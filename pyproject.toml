@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "signalepy"
+version = "0.1.2"
+authors = [
+  { name = "Angel Navarro-Mora", email = "ahnavarro@itcr.ac.cr" },
+]
+
+description = "Package for timber design calculations based on NDS standards."
+readme = "README.md"
+license = {file = "LICENSE" }
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.12",
+]
+
+dependencies = []
+
+[project.urls]
+"Homepage" = "https://github.com/ingahnavarro/timber_nds"
+
+[tool.setuptools]
+packages = ["sinalepy"]
+package-dir = {"" = "src"}
+
+[tool.setuptools.package-data]
+timber_nds = ["tests/*.py"]
