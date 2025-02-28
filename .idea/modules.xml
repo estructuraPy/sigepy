@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/signal_epy.iml" filepath="$PROJECT_DIR$/.idea/signal_epy.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/signalepy.iml" filepath="$PROJECT_DIR$/.idea/signalepy.iml" />
     </modules>
   </component>
 </project>
