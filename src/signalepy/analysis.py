@@ -1,13 +1,13 @@
-from io import BytesIO
+import warnings
 
-import ipywidgets as widgets
 import numpy as np
 import pandas as pd
 import pywt
-from PIL import Image
-from matplotlib import pyplot as plt
 from scipy.fft import fft, ifft
 from scipy.signal import detrend, butter, filtfilt
+from scipy.linalg import hankel, svd, eig
+
+from . import plot
 
 
 def generate_vibration_signal_dataframe(
@@ -187,16 +187,20 @@ def butter_bandpass_filter(
     low = lowcut / nyquist
     high = highcut / nyquist
     b, a = butter(order, [low, high], btype="band")
+
     return pd.Series(filtfilt(b, a, df[f"{label} Acceleration"]))
 
 
-def calculate_fft(df: pd.DataFrame, label: str) -> pd.DataFrame:
+def calculate_fft(df: pd.DataFrame, label: str, magnitude_type: str='calculated', magnitude_factor: float=1.0) -> pd.DataFrame:
     """
     Calculates the FFT of a single acceleration data column and returns a DataFrame with the results.
 
     Args:
         df: DataFrame containing 'Time' and '{label} Acceleration' columns.
         label: The label of the vibration (e.g., 'X', 'Y', 'Z').
+        magnitude_type: 'calculated' or 'normalized'
+        magnitude_factor: float number to be use as reference to normalized the fft spectrum. Only works
+            with magnitude_type = 'normalized'
 
     Returns:
         DataFrame containing the FFT results with 'Frequency' and '{label} Magnitude' columns.
@@ -205,29 +209,40 @@ def calculate_fft(df: pd.DataFrame, label: str) -> pd.DataFrame:
         - 'df' contains 'Time' and '{label} Acceleration' columns.
         - Time is uniformly sampled.
     """
+
     n = len(df[f"{label} Acceleration"])
     time_step = df["Time"].iloc[1] - df["Time"].iloc[0]
     sampling_rate = 1 / time_step
 
     accelerations = np.fft.fft(df[f"{label} Acceleration"])
     frequencies = np.fft.fftfreq(n, 1 / sampling_rate)
+
     magnitudes = np.abs(accelerations)
+
+    if magnitude_type == 'normalized':
+        modified_magnitudes = magnitudes / np.max(magnitudes) * magnitude_factor
+    elif magnitude_type == 'calculated':
+        modified_magnitudes = magnitudes
+    else:
+        raise ValueError("'normalized' or 'calculated'")
 
     return pd.DataFrame(
         {
             "Frequency": frequencies[: n // 2],
-            f"{label} Magnitude": magnitudes[: n // 2],
+            f"{label} Magnitude": modified_magnitudes[: n // 2],
         }
     )
 
 
 def cwt(df: pd.DataFrame, label: str, wavelet: str = "morl",
-        min_scale: int = 2, max_scale: int = 32,
-):
+        min_scale: int = 2, max_scale: int = 32, magnitude_type: str='calculated',
+        magnitude_factor: float=1.0) -> pd.DataFrame:
     """
     Performs Continuous Wavelet Transform (CWT) analysis on acceleration data.
 
     Args:
+        magnitude_factor:
+        magnitude_type:
         df: DataFrame containing 'Time' and '{label} Acceleration' columns.
         label: Direction of the acceleration data (e.g., 'X', 'Y', 'Z').
         wavelet: Wavelet function to use (default: 'cmor1.5-1.0').
@@ -260,131 +275,156 @@ def cwt(df: pd.DataFrame, label: str, wavelet: str = "morl",
     # Magnitude spectrum
     spectrum = np.abs(coefficients)
 
-    return spectrum, frequencies
+    if magnitude_type == 'normalized':
+        modified_spectrum = spectrum / np.max(spectrum) * magnitude_factor
+    elif magnitude_type == 'calculated':
+        modified_spectrum = spectrum
+    else:
+        raise ValueError("'normalized' or 'calculated'")
+
+    return modified_spectrum, frequencies
 
 
 def wavelet_spectrum(
-        df: pd.DataFrame,
-        label: str,
-        wavelet: str = "morl",
-        min_scale: float = 2.0,
-        max_scale: float = 32.0,
-        save_gif: bool = False,
-        file_location: str = "results/wavelet_spectrum.gif"
-):
+    df: pd.DataFrame,
+    label: str,
+    wavelet: str = "morl",
+    min_scale: float = 2.0,
+    max_scale: float = 32.0,
+    save_gif: bool = False,
+    file_location: str = "results/wavelet_spectrum.gif",
+    magnitude_type: str='calculated',
+    magnitude_factor: float=1.0):
     """
-    Applies Continuous Wavelet Transform (CWT) to filtered acceleration data,
-    calculates the average spectrum, and visualizes the time-frequency-magnitude spectrum.
+    Applies Continuous Wavelet Transform (CWT) to acceleration data and visualizes the spectrum.
 
     Args:
-        file_location:
-        df: DataFrame with 'Time' and at least '{label} Acceleration' column.
+        magnitude_factor:
+        magnitude_type:
+        df: DataFrame with 'Time' and '{label} Acceleration' column.
         label: Name of the acceleration column to analyze '{label} Acceleration'.
         wavelet: Wavelet function to use.
         min_scale: Minimum scale for the wavelet transform.
         max_scale: Maximum scale for the wavelet transform.
         save_gif: If True, saves the 3D plot rotation as a GIF.
+        file_location: Path to save the GIF file.
+
+    Returns:
+        None
     """
+    try:
+        spectrum, frequencies = cwt(df, label, wavelet, min_scale, max_scale, magnitude_type, magnitude_factor)
 
-    spectrum, frequencies = cwt(df, label, wavelet, min_scale, max_scale)
-    time_step = df["Time"].iloc[1] - df["Time"].iloc[0]
-    sampling_rate = 1 / time_step
-    nyquist_freq = sampling_rate / 2
+        time_min, time_max = df["Time"].min(), df["Time"].max()
+        freq_min, freq_max = frequencies.min(), frequencies.max()
 
-    time_min, time_max = df["Time"].min(), df["Time"].max()
-    freq_min, freq_max = frequencies.min(), nyquist_freq
-
-    def plot_spectrum(
-            min_time=time_min,
-            max_time=time_max,
-            min_frequency=freq_min,
-            max_frequency=freq_max,
-            label_size=None,
-            elevation=None,
-            rotation=None,
-    ):
-        """
-        Plots the 3D wavelet spectrum.
-
-        Args:
-            min_time: Minimum time value for the plot.
-            max_time: Maximum time value for the plot.
-            min_frequency: Minimum frequency value for the plot.
-            max_frequency: Maximum frequency value for the plot.
-            label_size: Font size for the axis labels.
-            elevation: Elevation angle for the 3D plot.
-            rotation: Azimuthal (horizontal) rotation angle for the 3D plot.
-        """
-        mask_x = (df["Time"] >= min_time) & (df["Time"] <= max_time)
-        mask_y = (frequencies >= min_frequency) & (frequencies <= max_frequency)
-
-        time_filtered = df["Time"][mask_x].values
-        frequencies_filtered = frequencies[mask_y]
-        spectrum_filtered = spectrum[np.ix_(mask_y, mask_x)]
-
-        X, Y = np.meshgrid(time_filtered, frequencies_filtered)
-
-        if X.shape != spectrum_filtered.shape:
-            print(
-                f"Shape mismatch: X{X.shape}, Y{Y.shape}, Z{spectrum_filtered.shape}"
-            )
-            return
-
-        figx = plt.figure(figsize=(12, 12))
-        ax = figx.add_subplot(111, projection="3d")
-        ax.plot_surface(X, Y, spectrum_filtered, cmap="viridis")
-
-        ax.set_xlabel("Time (s)", fontsize=label_size)
-        ax.set_ylabel("Frequency (Hz)", fontsize=label_size)
-        ax.set_zlabel("Magnitude", fontsize=label_size)
-        ax.set_title("Time - Frequency - Magnitude Wavelet Spectrum", fontsize=label_size)
-        ax.view_init(elev=elevation, azim=rotation)
-        return figx
-
-    if save_gif:
-        frames = []
-        for angle in range(0, 360, 10):
-            fig = plot_spectrum(
-                elevation=30, rotation=angle
-            )  # Fixed elevation, varying rotation
-
-            if fig is None:
-                continue
-
-            try:
-                buf = BytesIO()
-                fig.canvas.draw()
-                fig.savefig(buf, format='png')
-                buf.seek(0)
-                image = Image.open(buf)
-                frames.append(image)
-                plt.close(fig)
-            except Exception as e:
-                print(f"Error processing frame: {e}")
-                if fig:
-                    plt.close(fig)  # Ensure the figure is closed even on error
-                continue
-
-        if frames:  # Only save the GIF if there are frames
-            frames[0].save(
-                file_location,
-                save_all=True,
-                append_images=frames[1:],
-                loop=0,
-                duration=100,
-            )
-            print("GIF saved as 'wavelet_spectrum.gif'")
-        else:
-            print("No frames were generated. GIF not saved.")
-
-    else:
-        widgets.interact(
-            plot_spectrum,
-            elevation=(0, 360, 10),
-            rotation=(0, 360, 10),
-            label_size=(6, 32, 2),
-            min_time=(time_min, time_max, (time_max - time_min) / 100),
-            max_time=(time_min, time_max, (time_max - time_min) / 100),
-            min_frequency=(freq_min, freq_max, (freq_max - freq_min) / 50),
-            max_frequency=(freq_min, freq_max, (freq_max - freq_min) / 50),
+        # Call interactive plotting function
+        interactive_plot = plot.interactive_wavelet_spectrum(
+            df["Time"].values,
+            frequencies,
+            spectrum,
+            time_min,
+            time_max,
+            freq_min,
+            freq_max,
         )
+
+        # Display the interactive plot if it was successfully created
+        if interactive_plot is not None:
+            from IPython.display import display
+            display(interactive_plot)
+        else:
+            warnings.warn("Interactive plot could not be created.")
+
+        if save_gif:
+            plot.wavelet_spectrum_gif(
+                df["Time"].values,
+                frequencies,
+                spectrum,
+                file_location,
+                time_min,
+                time_max,
+                freq_min,
+                freq_max,
+            )
+
+    except Exception as e:
+        warnings.warn(f"An error occurred during wavelet spectrum processing: {e}")
+
+
+def ssi_cov(
+    df: pd.DataFrame,
+    label: str,
+    Ts: int = 100,
+    Nmin: int = 2,
+    Nmax: int = 20,
+    threshold: float = 0.01,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Performs Stochastic Subspace Identification (SSI) analysis on acceleration data.
+
+    Args:
+        df: DataFrame containing the acceleration data.
+        label: Column name of the acceleration data.
+        Ts: Number of rows for the Hankel matrix.
+        Nmin: Minimum number of modes to consider. (Unused in the current implementation)
+        Nmax: Maximum number of modes to consider.
+        threshold: Frequency threshold for pole counting.
+
+    Returns:
+        A tuple containing:
+            frequencies: Frequency axis for the power spectrum.
+            power_spectrum: Power spectrum of the acceleration data.
+            fn0: Natural frequencies of the identified modes.
+            zeta0: Damping ratios of the identified modes.
+            number_of_poles: Number of poles within the frequency threshold.
+
+    Assumptions:
+        - Acceleration data is uniformly sampled.
+    """
+    # Extract acceleration data
+    acceleration = df[f'{label} Acceleration'].values
+
+    # Construct Hankel matrix
+    H = hankel(acceleration[:Ts], acceleration[-Ts:])
+
+    # Perform Singular Value Decomposition (SVD)
+    U, S, V = svd(H, full_matrices=False)
+
+    # Determine number of modes
+    num_modes = min(Nmax, len(S))
+    U = U[:, :num_modes]
+    S = np.diag(S[:num_modes])
+    V = V[:num_modes, :]
+
+    # Calculate state-space matrices
+    A = V @ np.diag(1 / np.diag(S)) @ U.T @ H
+    C = U[:, :num_modes]
+
+    # Calculate eigenvalues and eigenvectors
+    eigenvalues, eigenvectors = eig(A)
+
+    # Calculate natural frequencies and damping ratios
+    fn0 = np.abs(np.arctan2(eigenvalues.imag, eigenvalues.real)) / (2 * np.pi)
+    zeta0 = -eigenvalues.real / np.abs(eigenvalues)
+
+    # Filter valid modes
+    valid_modes = (fn0 > 0) & (zeta0 < 1)
+    fn0 = fn0[valid_modes]
+    zeta0 = zeta0[valid_modes]
+
+    # Calculate power spectrum
+    power_spectrum = np.abs(np.fft.fft(acceleration)) ** 2
+    frequencies = np.fft.fftfreq(len(acceleration))
+
+    # Ensure frequencies and power_spectrum are positive
+    positive_freqs = frequencies > 0
+    frequencies = frequencies[positive_freqs]
+    power_spectrum = power_spectrum[positive_freqs]
+
+    # Count number of poles within frequency range
+    number_of_poles = np.zeros_like(frequencies)
+    for i, freq in enumerate(frequencies):
+        number_of_poles[i] = np.sum((fn0 >= freq - threshold) & (fn0 <= freq + threshold))
+
+    return frequencies, power_spectrum, fn0, zeta0, number_of_poles

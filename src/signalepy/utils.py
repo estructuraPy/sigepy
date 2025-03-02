@@ -4,12 +4,28 @@ import numpy as np
 import json
 import os
 
-def get_file_location(file_name: str):
+def get_tests_files_location(file_name: str):
     notebook_location = pathlib.Path().absolute()
     parent_directory = notebook_location.parent
     data_folder = parent_directory / 'tests/test_data'
     file_location = data_folder / file_name
     return file_location
+
+
+def get_results_files_location(file_name: str):
+    notebook_location = pathlib.Path().absolute()
+    parent_directory = notebook_location.parent
+    data_folder = parent_directory / 'tutorials/results'
+    file_location = data_folder / file_name
+    return file_location
+
+
+def get_data_files_location(file_name: str):
+    source_code_location = pathlib.Path(__file__).resolve().parent
+    data_folder = source_code_location / 'data'
+    file_location = data_folder / file_name
+    return file_location
+
 
 def import_sts_acceleration_txt(file_location: str, label: str) -> pd.DataFrame:
     """
