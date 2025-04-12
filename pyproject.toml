@@ -9,7 +9,7 @@ authors = [
     { name = "Angel Navarro-Mora", email = "ahnavarro@anmingeniería.com" },
 ]
 
-description = "Package for signal processing for structural vibrations analysis."
+description = "estructuraPy Package for signal processing for structural vibrations analysis."
 readme = "README.md"
 license = { file = "LICENSE" }
 classifiers = [
@@ -18,10 +18,10 @@ classifiers = [
 ]
 dependencies = []
 [project.urls]
-"Homepage" = "https://github.com/estructuraPy/signalepy"
+"Homepage" = "https://github.com/estructuraPy/sigepy"
 
 [tool.setuptools]
-packages = ["signalepy"]
+packages = ["sigepy"]
 package-dir = {"" = "src"}
 
 [tool.setuptools.package-data]

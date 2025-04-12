@@ -1,8 +1,8 @@
-# SignalePy
+# SigePy
 
 ## A Comprehensive Signal Processing Library for Python
 
-SignalePy is an advanced Python library dedicated to signal processing tasks across various domains including audio processing, biomedical signal analysis, telecommunications, and general time series analysis.
+SigePy is an advanced Python library dedicated to signal processing tasks across various domains including audio processing, biomedical signal analysis, telecommunications, and general time series analysis.
 
 ## Core Capabilities
 
@@ -84,4 +84,4 @@ For complete API reference and examples, visit our [documentation](https://signa
 
 ## License
 
-SignalePy is released under the MIT License.
+SigePy is released under the MIT License.
