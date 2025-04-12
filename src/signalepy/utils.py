@@ -4,7 +4,7 @@ import numpy as np
 import json
 import os
 from scipy.signal import detrend, butter, filtfilt
-from typing import List
+from typing import List, Dict, Union
 from pathlib import Path
 from dataclasses import dataclass
 import matplotlib.pyplot as plt
@@ -190,13 +190,13 @@ def import_cscr_fed(file_location: str, json_location: str) -> pd.DataFrame:
         return None
 
 
-def generate_vibration_signal_dataframe(
+def generate_vibration_signal(
+        label: str,
         total_time: float,
         sampling_rate: float,
         frequency_inputs: list,
         amplitude_inputs: list,
         noise_amplitude: float,
-        label: str,
 ) -> pd.DataFrame:
     """
     Generates a synthetic vibration signal with time-varying or constant frequencies and returns it as a DataFrame.
@@ -234,6 +234,55 @@ def generate_vibration_signal_dataframe(
     acceleration += noise_amplitude * np.random.normal(size=len(t))
 
     return pd.DataFrame({"Time": t, f"{label} Acceleration": acceleration})
+
+
+def generate_vibration_signals(
+    labels: List[str],
+    total_time: float,
+    sampling_rate: float,
+    frequency_inputs: Dict[str, List[Union[float, callable]]],
+    amplitude_inputs: Dict[str, List[Union[float, callable]]],
+    noise_amplitudes: Dict[str, float],
+) -> pd.DataFrame:
+    """
+    Generates synthetic vibration signals for multiple directions and returns them as a DataFrame.
+
+    Args:
+        total_time: Total duration of the signal (in seconds).
+        sampling_rate: Sampling rate (in Hz).
+        frequency_inputs: Dictionary of lists of functions or constant values describing how frequencies vary over time for each label.
+        amplitude_inputs: Dictionary of lists of functions or constant values describing how amplitudes vary over time for each label.
+        noise_amplitudes: Dictionary of noise amplitudes for each label.
+        labels: List of directions of the vibration signals.
+
+    Returns:
+        DataFrame with columns 'Time' and '{label} Acceleration' for each label.
+    """
+    t = np.linspace(0, total_time, int(total_time * sampling_rate), endpoint=False)
+    df = {'Time': t}
+
+    for label in labels:
+        acceleration = np.zeros_like(t)
+
+        for freq_input, amp_input in zip(frequency_inputs[label], amplitude_inputs[label]):
+            if callable(freq_input):
+                instantaneous_frequencies = freq_input(t)
+            else:
+                instantaneous_frequencies = np.full_like(t, freq_input)
+
+            if callable(amp_input):
+                instantaneous_amplitudes = amp_input(t)
+            else:
+                instantaneous_amplitudes = np.full_like(t, amp_input)
+
+            acceleration += instantaneous_amplitudes * np.sin(
+                2 * np.pi * instantaneous_frequencies * t
+            )
+
+        acceleration += noise_amplitudes[label] * np.random.normal(size=len(t))
+        df[f"{label} Acceleration"] = acceleration
+
+    return pd.DataFrame(df)
 
 
 @dataclass

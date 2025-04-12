@@ -77,7 +77,7 @@ def calculate_cwt(df: pd.DataFrame, label: str, wavelet_function: str = "morl",
     return modified_spectrum, frequencies
 
 
-def wavelet_spectrum_gif(
+def plot_spectrum_gif(
     time: np.ndarray,
     frequencies: np.ndarray,
     spectrum: np.ndarray,

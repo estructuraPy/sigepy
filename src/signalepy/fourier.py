@@ -5,7 +5,6 @@ import pywt
 from scipy.signal import detrend, butter, filtfilt
 from scipy.linalg import hankel, svd, eig
 from numpy.typing import NDArray
-from . import plot
 from . import utils
 import numpy as np
 import pandas as pd
@@ -17,7 +16,7 @@ from scipy.fft import fft, ifft, fftfreq
 from scipy.signal import detrend, butter, filtfilt
 from scipy.linalg import hankel, svd, eig, toeplitz
 from IPython.display import display
-from signalepy import plot, utils
+from signalepy import utils
 from collections import OrderedDict
 from typing import Tuple,Dict, Union, List
 from dataclasses import dataclass, field
