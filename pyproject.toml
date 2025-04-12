@@ -3,7 +3,7 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "signalepy"
+name = "sigepy"
 version = "0.1.0"
 authors = [
     { name = "Angel Navarro-Mora", email = "ahnavarro@anmingeniería.com" },
