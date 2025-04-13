@@ -1,7 +1,7 @@
 .. SigePy documentation master file.
 
 Welcome to SigePy's Documentation
-==========================================================================================================
+==================================
 
 .. image:: https://github.com/estructuraPy/sigepy/raw/main/estructurapy.png
    :alt: SigePy Logo
@@ -19,7 +19,7 @@ operational modal data.
 :License: MIT
 
 Key Features
---------------------------------------------
+-----------
 
 * **Fourier Analysis**: Enhanced FFT for structural dynamics, peak detection, and spectral analysis
 * **Stochastic Subspace Identification**: Covariance-driven SSI for modal identification
@@ -27,7 +27,7 @@ Key Features
 * **Signal Processing**: Time-domain analysis, filtering, and preprocessing
 
 Installation
---------------------------------------------
+-----------
 
 Install SigePy using pip:
 
@@ -42,7 +42,7 @@ Install SigePy using pip:
    modules
 
 Indices and tables
-========================================================================
+==================
 
 * :ref:`genindex`
 * :ref:`modindex`
