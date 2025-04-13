@@ -1,14 +1,12 @@
 Fourier Analysis
 ================
-This module provides tools for frequency-domain analysis, enabling transformations
-of vibration signals, filtering, peak detection, and various visualizations.
+This module provides functions for frequency domain analysis of vibration signals,
+ including FFT calculation, filtering, and visualization.
 
 .. automodule:: sigepy.fourier
    :members:
    :undoc-members:
    :show-inheritance:
-
-This module provides functions for frequency domain analysis of vibration signals, including FFT calculation, filtering, and visualization.
 
 Core Analysis Functions
 -----------------------

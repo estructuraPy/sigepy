@@ -1,12 +1,14 @@
 .. SigePy documentation master file.
 
-Welcome to SigePy's Documentation
-==================================
 
 .. image:: https://github.com/estructuraPy/sigepy/raw/main/estructurapy.png
    :alt: SigePy Logo
    :align: center
    :width: 300px
+
+
+Welcome to SigePy's Documentation
+==================================
 
 **SigePy** is an advanced Python library specialized in structural vibration analysis 
 and system identification, with robust capabilities for processing experimental and 

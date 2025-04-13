@@ -1,14 +1,14 @@
 Wavelet Analysis
 ================
-This section provides methods for decomposing and analyzing nonstationary signals
-using wavelet transforms, including static and interactive visualizations.
+This module provides functions for time-frequency analysis using wavelets,
+particularly focused on analyzing non-stationary vibration signals.
 
 .. automodule:: sigepy.wavelet
    :members:
    :undoc-members:
    :show-inheritance:
 
-This module provides functions for time-frequency analysis using wavelets, particularly focused on analyzing non-stationary vibration signals.
+
 
 Core Analysis Functions
 -----------------------
