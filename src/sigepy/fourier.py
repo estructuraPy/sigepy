@@ -203,7 +203,8 @@ def plot_fft_results_period_domain(df: pd.DataFrame, label: str, color: str = "r
     plt.ylabel("Magnitude")
     plt.grid(True)
     plt.legend()
-    plt.savefig(f"results/fft_period_domain {label}.png", dpi=300)
+    plt.savefig(f"results/fft_period_domain_{label}.png", dpi=300)
+    plt.show()
 
 
 def plot_peaks(
@@ -376,7 +377,7 @@ def plotly_fft_results_period_domain(
         template="plotly_white",
     )
 
-    fig.write_html(f"results/fft_period_domain {label}.html")
+    fig.write_html(f"results/fft_period_domain_{label}.html")
     return fig
 
 

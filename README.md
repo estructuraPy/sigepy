@@ -11,9 +11,10 @@ SigePy is an advanced Python library specialized in structural vibration analysi
   - Automated model order selection
   - Stabilization diagrams
   - Modal parameter extraction
+  - Robust handling of noisy data
 - **SSI-DATA**: Data-driven Stochastic Subspace Identification
 - **Operational Modal Analysis**: Output-only modal identification
-- **Modal Validation**: MAC, COMAC, and mode complexity indicators
+- **Modal Validation**: MAC (Modal Assurance Criterion), COMAC (Coordinate Modal Assurance Criterion), and mode complexity indicators
 
 ### Time Domain Analysis
 - **Statistical Analysis**: RMS, crest factor, kurtosis for vibration assessment
@@ -23,39 +24,47 @@ SigePy is an advanced Python library specialized in structural vibration analysi
 
 ### Frequency Domain Analysis
 - **Fourier Analysis**: Enhanced FFT for structural dynamics
-- **Spectral Analysis**: Power Spectral Density (PSD), FRF computation
+- **Spectral Analysis**: Power Spectral Density (PSD), Frequency Response Function (FRF) computation
 - **Modal Parameters**: Natural frequencies and damping estimation
 - **Order Analysis**: For rotating machinery diagnostics
 
 ### Time-Frequency Analysis
 - **Short-Time Fourier Transform (STFT)**: Non-stationary response analysis
-- **Wavelet Analysis**: Damage localization and transient detection
-- **EMD/HHT**: Hilbert-Huang Transform for nonlinear systems
+- **Wavelet Analysis**: Continuous Wavelet Transform (CWT) for damage localization and transient detection
+- **Hilbert-Huang Transform (HHT)**: Empirical Mode Decomposition (EMD) for nonlinear systems
 
 ### Signal Processing
 - **FIR/IIR Filters**: Digital filtering for noise reduction
 - **Adaptive Filtering**: LMS, RLS algorithms
 - **Signal Enhancement**: Advanced denoising techniques
+- **Bandpass Filtering**: For isolating specific frequency ranges
+
+### Visualization
+- **Stabilization Diagrams**: For SSI-COV and SSI-DATA
+- **Time-Frequency Spectra**: Interactive 3D plots for wavelet and STFT analysis
+- **Modal Shapes**: Visualization of extracted mode shapes
+- **Acceleration Plots**: Time-domain signal visualization
 
 ## Technical Implementation
 
-SigePy leverages NumPy, SciPy, and optimized C/C++ extensions for maximum performance in:
+SigePy leverages NumPy, SciPy, Matplotlib, and Plotly for efficient computation and visualization. Key features include:
 
 - Real-time structural monitoring
 - Multi-channel sensor arrays
-- Large-scale vibration data
+- Large-scale vibration data processing
 - High-frequency sampling applications
+- Interactive plotting for enhanced analysis
 
 ## Installation
 
 ```bash
-pip install signalepy
+pip install sigepy
 ```
 
 ## Basic Usage
 
 ```python
-import siglepy as sp
+import sigepy as sp
 import numpy as np
 
 # Load acceleration data
@@ -87,6 +96,26 @@ modal_params = sp.modal.oma(
     method='ssi-cov',
     n_modes=5
 )
+
+# Wavelet Analysis
+time = np.linspace(0, len(data) / fs, len(data))
+frequencies, spectrum = sp.wavelet.calculate_cwt(
+    pd.DataFrame({'Time': time, 'X Acceleration': data}),
+    label='X',
+    wavelet_function='morl',
+    min_scale=2,
+    max_scale=32
+)
+sp.wavelet.plot_spectrum_gif(
+    time,
+    frequencies,
+    spectrum,
+    file_location='results/wavelet_spectrum.gif',
+    min_time=0,
+    max_time=time[-1],
+    min_frequency=frequencies.min(),
+    max_frequency=frequencies.max()
+)
 ```
 
 ## Application Areas
@@ -108,7 +137,7 @@ modal_params = sp.modal.oma(
 
 ## Documentation
 
-For complete API reference and examples, visit our [documentation](https://signalepy.readthedocs.io/).
+For complete API reference and examples, visit our [documentation](https://sigepy.readthedocs.io/).
 
 ## License
 

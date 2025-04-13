@@ -4,9 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sigepy"
-version = "0.1.1"
+version = "0.1.4"
 authors = [
-    { name = "Angel Navarro-Mora", email = "ahnavarro@anmingeniería.com" },
+    { name = "Angel Navarro-Mora", email = "ahnavarro@anmingenieria.com" },
 ]
 
 description = "estructuraPy Package for signal processing for structural vibrations analysis."

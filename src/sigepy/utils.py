@@ -42,7 +42,7 @@ def estimate_power_of_two(df: pd.DataFrame) -> int:
 
 def get_tests_files_location(file_name: str) -> Path:
     """
-    Gets the file location in the tests directory.
+    Gets the file location in the current directory.
 
     Args:
         file_name: Name of the file.
@@ -50,10 +50,8 @@ def get_tests_files_location(file_name: str) -> Path:
     Returns:
         The file location as a Path object.
     """
-    notebook_location = pathlib.Path().absolute()
-    parent_directory = notebook_location.parent
-    data_folder = parent_directory / 'tests/test_data'
-    file_location = data_folder / file_name
+    current_directory = pathlib.Path().absolute()
+    file_location = current_directory / file_name
     return file_location
 
 
@@ -473,6 +471,7 @@ def plot_acceleration(df: pd.DataFrame, label: str, color: str = "red"):
     plt.xlabel("Time (s)")
     plt.ylabel(r"Acceleration ($m/s^{2}$)")
     plt.legend()
+    os.makedirs("results", exist_ok=True)
     plt.savefig(f"results/{label} Acceleration.png", dpi=300)
     plt.show()
 
@@ -505,5 +504,6 @@ def plotly_acceleration(df: pd.DataFrame, label: str, color: str = "red") -> go.
         yaxis_title="Acceleration (m/s^2)",
         template="plotly_white",
     )
+    os.makedirs("results", exist_ok=True)
     fig.write_html(f"results/{label} Acceleration.html")
     return fig

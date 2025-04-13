@@ -1,5 +1,4 @@
 import warnings
-import numpy as np
 import pandas as pd
 import pywt
 from scipy.signal import detrend, butter, filtfilt
@@ -21,9 +20,11 @@ from dataclasses import dataclass, field
 from tqdm import tqdm
 import gc
 from io import BytesIO
+from PIL import Image
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from ipywidgets import IntSlider, FloatSlider
+import os
 
 
 def calculate_cwt(df: pd.DataFrame, label: str, wavelet_function: str = "morl",
@@ -103,46 +104,49 @@ def plot_spectrum_gif(
     Returns:
         None
     """
+    # Crear el directorio results si no existe
+    os.makedirs(os.path.dirname(file_location), exist_ok=True)
+    
     frames = []
-    for angle in range(0, 360, 10):
-        fig = plot_wavelet_spectrum(
-            time,
-            frequencies,
-            spectrum,
-            min_time,
-            max_time,
-            min_frequency,
-            max_frequency,
-            elevation=30,
-            rotation=angle,
-        )  # Fixed elevation, varying rotation
+    X, Y = np.meshgrid(time, frequencies)
+    
+    # Usar menos ángulos y mayor paso
+    for angle in range(0, 360, 45):  # 8 frames en total
+        fig = plt.figure(figsize=(6, 4), dpi=80)  # Figura más pequeña y menor DPI
+        ax = fig.add_subplot(111, projection='3d')
+        
+        surf = ax.plot_surface(X, Y, spectrum, cmap='viridis', 
+                             rcount=50, ccount=50)  # Reducir la resolución de la superficie
+        
+        ax.set_xlabel('Time (s)')
+        ax.set_ylabel('Frequency (Hz)')
+        ax.set_zlabel('Magnitude')
+        ax.view_init(elev=30, azim=angle)
+        
+        plt.tight_layout()
+        
+        # Capturar frame de manera más eficiente
+        buf = BytesIO()
+        fig.savefig(buf, format='png', bbox_inches='tight', 
+                   pad_inches=0.1, dpi=80)
+        buf.seek(0)
+        img = Image.open(buf)
+        img = img.convert('P', palette=Image.ADAPTIVE, colors=256)  # Reducir colores
+        frames.append(img)
+        
+        plt.close(fig)
+        buf.close()
 
-        if fig is None:
-            continue
-
-        try:
-            buf = BytesIO()
-            fig.canvas.draw()
-            fig.savefig(buf, format="png")
-            buf.seek(0)
-            image = Image.open(buf)
-            frames.append(image)
-            plt.close(fig)
-        except Exception as e:
-            print(f"Error processing frame: {e}")
-            if fig:
-                plt.close(fig)  # Ensure the figure is closed even on error
-            continue
-
-    if frames:  # Only save the GIF if there are frames
+    if frames:
         frames[0].save(
             file_location,
             save_all=True,
             append_images=frames[1:],
-            loop=0,
-            duration=100,
+            optimize=True,
+            duration=200,  # Más tiempo entre frames
+            loop=0
         )
-        print("GIF saved as 'wavelet_spectrum.gif'")
+        print(f"GIF saved as '{file_location}'")
     else:
         print("No frames were generated. GIF not saved.")
 
@@ -155,7 +159,7 @@ def plot_interactive_wavelet_spectrum(
     max_time: float,
     min_frequency: float,
     max_frequency: float,
-):
+) -> None:
     """
     Displays an interactive plot of the wavelet spectrum using ipywidgets and Matplotlib.
 
@@ -169,13 +173,10 @@ def plot_interactive_wavelet_spectrum(
         max_frequency: Maximum frequency value for the plot.
 
     Returns:
-        The interactive plot widget.
+        None
     """
-
-    def plot_surface(elevation, rotation, min_time_val, max_time_val, min_frequency_val, max_frequency_val):
-        """
-        Helper function to create the surface plot with given parameters.
-        """
+    def update_plot(elevation, rotation, min_time_val, max_time_val, min_frequency_val, max_frequency_val):
+        """Update the plot with new parameters."""
         mask_x = (time >= min_time_val) & (time <= max_time_val)
         mask_y = (frequencies >= min_frequency_val) & (frequencies <= max_frequency_val)
 
@@ -185,19 +186,16 @@ def plot_interactive_wavelet_spectrum(
 
         X, Y = np.meshgrid(time_filtered, frequencies_filtered)
 
+        plt.clf()
         fig = plt.figure(figsize=(8, 6))
         ax = fig.add_subplot(111, projection='3d')
         ax.plot_surface(X, Y, spectrum_filtered, cmap='viridis')
-
         ax.set_xlabel("Time (s)")
         ax.set_ylabel("Frequency (Hz)")
         ax.set_zlabel("Magnitude")
         ax.set_title("Interactive Wavelet Spectrum")
-
-        # Set view angle
         ax.view_init(elev=elevation, azim=rotation)
-
-        plt.show()  # Show the plot
+        plt.show()
 
     elevation_slider = IntSlider(value=30, min=0, max=90, step=5, description="Elevation")
     rotation_slider = IntSlider(value=0, min=0, max=360, step=10, description="Rotation")
@@ -206,8 +204,9 @@ def plot_interactive_wavelet_spectrum(
     min_frequency_slider = FloatSlider(value=min_frequency, min=min_frequency, max=max_frequency, step=(max_frequency - min_frequency) / 50, description="Min Frequency")
     max_frequency_slider = FloatSlider(value=max_frequency, min=min_frequency, max=max_frequency, step=(max_frequency - min_frequency) / 50, description="Max Frequency")
 
-    interactive_plot = plot_interactive_wavelet_spectrum(
-        plot_surface,
+    from ipywidgets import interact
+    interact(
+        update_plot,
         elevation=elevation_slider,
         rotation=rotation_slider,
         min_time_val=min_time_slider,
@@ -215,8 +214,6 @@ def plot_interactive_wavelet_spectrum(
         min_frequency_val=min_frequency_slider,
         max_frequency_val=max_frequency_slider
     )
-
-    return interactive_plot
 
 def spectrum(
     df: pd.DataFrame,
@@ -227,7 +224,8 @@ def spectrum(
     save_gif: bool = False,
     file_location: str = "results/wavelet_spectrum.gif",
     magnitude_type: str='calculated',
-    magnitude_factor: float=1.0):
+    magnitude_factor: float=1.0
+) -> None:
     """
     Applies Continuous Wavelet Transform (CWT) to acceleration data and visualizes the spectrum.
 
@@ -251,26 +249,19 @@ def spectrum(
         time_min, time_max = df["Time"].min(), df["Time"].max()
         freq_min, freq_max = frequencies.min(), frequencies.max()
 
-        # Call interactive plotting function
-        interactive_plot = plot_interactive_wavelet_spectrum(
+        # Call interactive plotting function directly with all required arguments
+        plot_interactive_wavelet_spectrum(
             df["Time"].values,
             frequencies,
             spectrum,
             time_min,
             time_max,
             freq_min,
-            freq_max,
+            freq_max
         )
 
-        # Display the interactive plot if it was successfully created
-        if interactive_plot is not None:
-            from IPython.display import display
-            display(interactive_plot)
-        else:
-            warnings.warn("Interactive plot could not be created.")
-
         if save_gif:
-            plot.wavelet_spectrum_gif(
+            plot_spectrum_gif(
                 df["Time"].values,
                 frequencies,
                 spectrum,
@@ -294,6 +285,7 @@ def plot_spectrum_views(
     rotation: int = 30,
     label_size: int = 10,
     label_offset: float = 0.1,
+    display_plot: bool = True,
 ):
     """
     Plots the time-frequency-magnitude wavelet spectrum in four subplots: XY, XZ, YZ, and 3D and saves the figure.
@@ -307,6 +299,7 @@ def plot_spectrum_views(
         rotation: Rotation angle for the 3D plot (default: 0).
         label_size: Font size for labels (default: 10).
         label_offset: Offset for labels (default: 0.1).
+        display_plot: Whether to display the plot (default: True).
 
     Returns:
         None (displays the subplots).
@@ -377,8 +370,13 @@ def plot_spectrum_views(
     ax4.set_position([box.x0, box.y0, box.width, y_height])
 
     plt.tight_layout()
+    os.makedirs("results", exist_ok=True)
     plt.savefig(f"results/ws_views_for_for_{label}.png", dpi=300)
-    plt.show()
+    if display_plot:
+        plt.show()
+    else:
+        plt.close(fig)
+    return fig
 
 
 def plot_spectrum_time_frequency(
@@ -435,6 +433,7 @@ def plot_spectrum_time_frequency(
     fig.colorbar(contour, ax=ax)
 
     plt.tight_layout()
+    os.makedirs("results", exist_ok=True)
     plt.savefig(f"results/ws_tf_for_{label}.png", dpi=300)
     plt.show()
 
@@ -492,6 +491,7 @@ def plot_spectrum_time_magnitude(
     fig.colorbar(contour, ax=ax)
 
     plt.tight_layout()
+    os.makedirs("results", exist_ok=True)
     plt.savefig(f"results/ws_tm_for_{label}.png", dpi=300)
     plt.show()
 
@@ -548,6 +548,7 @@ def plot_spectrum_frequency_magnitude(
     fig.colorbar(c, ax=ax)
 
     plt.tight_layout()
+    os.makedirs("results", exist_ok=True)
     plt.savefig(f"results/ws_fm_for_{label}.png", dpi=300)
     plt.show()
 
@@ -643,6 +644,7 @@ def plotly_spectrum_views(
 
     fig.update_layout(title_text=f"{label} Wavelet Spectrum Views", template="plotly_white")
 
+    os.makedirs("results", exist_ok=True)
     fig.write_html(f"results/ws_views_for_for_{label}.html")
     return fig
 
@@ -700,6 +702,7 @@ def plotly_spectrum_time_frequency(
         template="plotly_white",
     )
 
+    os.makedirs("results", exist_ok=True)
     fig.write_html(f"results/ws_tf_for_{label}.html")
     return fig
 
@@ -758,6 +761,7 @@ def plotly_spectrum_time_magnitude(
         template="plotly_white",
     )
 
+    os.makedirs("results", exist_ok=True)
     fig.write_html(f"results/ws_tm_for_{label}.html")
     return fig
 
@@ -816,6 +820,7 @@ def plotly_wavelet_spectrum_frequency_magnitude(
         template="plotly_white",
     )
 
+    os.makedirs("results", exist_ok=True)
     fig.write_html(f"results/ws_fm_for_{label}.html")
     return fig
 
