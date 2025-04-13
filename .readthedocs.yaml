@@ -9,7 +9,7 @@ formats:
   - epub
 
 python:
-  interpreter: "3.12"
+  version: "3.12"
   install:
     - requirements: requirements.txt
 
