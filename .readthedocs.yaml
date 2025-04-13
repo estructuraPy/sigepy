@@ -16,7 +16,7 @@ python:
 build:
   os: ubuntu-22.04
   tools:
-    - python
-    - pip
+    python: "3.12"
+    pip: "latest"
   commands:
     - make html
