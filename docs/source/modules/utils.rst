@@ -1,6 +1,5 @@
 Utils Module
-=============
-
+============
 This module provides general-purpose utilities for data handling, signal generation, and preprocessing.
 
 .. automodule:: sigepy.utils
