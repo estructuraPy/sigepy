@@ -1,34 +1,47 @@
 # Configuration file for the Sphinx documentation builder.
-#
-# For the full list of built-in configuration values, see the documentation:
 
 import os
 import sys
+import warnings
 
+# Add the source directory to the Python path so Sphinx can import modules
 sys.path.insert(0, os.path.abspath('../../src'))
-# -- Project information -----------------------------------------------------
 
+# Enable better handling of imports
+autodoc_mock_imports = ['numpy', 'pandas', 'scipy', 'matplotlib', 'plotly', 'pywt', 'tqdm', 'PIL', 'ipywidgets']
+
+# Silence warnings about missing references (usually from external libs)
+warnings.filterwarnings('ignore', message='.*Duplicate C++ declaration.*')
+
+# -- Project information -----------------------------------------------------
 project = 'SigePy'
-copyright = '2025, estructuraPy'
 author = 'Angel Navarro-Mora'
-release = '0.1.4'
+copyright = '2025, estructuraPy'
+release = '0.1.5'
 
 # -- General configuration ---------------------------------------------------
-
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.napoleon'
+    'sphinx.ext.autodoc',  
+    'sphinx.ext.napoleon',  # For parsing Google/NumPy-style docstrings
+    'sphinx.ext.viewcode',  # Shows source code links in docs
+    'sphinx.ext.autosummary',  # Creates summary tables
 ]
 
-templates_path = ['_templates']
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+# Configure autodoc
+autodoc_default_options = {
+    'members': True,
+    'undoc-members': True,
+    'show-inheritance': True,
+    'special-members': '__init__',
+}
 
+# Enable autosummary
+autosummary_generate = True
+
+templates_path = ['_templates']
+exclude_patterns = []
 
 # -- Options for HTML output -------------------------------------------------
-
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
-
-# Ensure that the module documentation can be found
-html_extra_path = ['modules']
+html_logo = 'https://github.com/estructuraPy/sigepy/raw/main/estructurapy.png'

@@ -6,12 +6,32 @@ Wavelet Analysis
    :undoc-members:
    :show-inheritance:
 
-Overview
---------
+This module provides functions for time-frequency analysis using wavelets, particularly focused on analyzing non-stationary vibration signals.
 
-The ``wavelet`` module provides functions for time-frequency analysis using wavelets:
+Core Analysis Functions
+---------------------
 
-* Continuous Wavelet Transform (CWT) calculation
-* Interactive visualization of wavelet spectra
-* Time-frequency analysis of non-stationary signals
-* Multiple visualization options (3D plots, contour plots, etc.)
+.. autofunction:: sigepy.wavelet.calculate_cwt
+.. autofunction:: sigepy.wavelet.spectrum
+
+Interactive Visualization
+------------------------
+
+.. autofunction:: sigepy.wavelet.plot_interactive_wavelet_spectrum
+.. autofunction:: sigepy.wavelet.plot_spectrum_gif
+
+Matplotlib Visualization
+----------------------
+
+.. autofunction:: sigepy.wavelet.plot_spectrum_views
+.. autofunction:: sigepy.wavelet.plot_spectrum_time_frequency
+.. autofunction:: sigepy.wavelet.plot_spectrum_time_magnitude
+.. autofunction:: sigepy.wavelet.plot_spectrum_frequency_magnitude
+
+Plotly Visualization
+------------------
+
+.. autofunction:: sigepy.wavelet.plotly_spectrum_views
+.. autofunction:: sigepy.wavelet.plotly_spectrum_time_frequency
+.. autofunction:: sigepy.wavelet.plotly_spectrum_time_magnitude
+.. autofunction:: sigepy.wavelet.plotly_wavelet_spectrum_frequency_magnitude
