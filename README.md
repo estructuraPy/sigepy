@@ -47,6 +47,8 @@ SigePy is an advanced Python library specialized in structural vibration analysi
 
 ## Installation
 
+SigePy requires Python 3.13 or higher. Install it using pip:
+
 ```bash
 pip install sigepy
 ```

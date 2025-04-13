@@ -1,40 +1,23 @@
-import warnings
 import numpy as np
 import pandas as pd
-import pywt
-from scipy.signal import detrend, butter, filtfilt
-from scipy.linalg import hankel, svd, eig
-from numpy.typing import NDArray
-from . import utils
-import numpy as np
-import pandas as pd
-import pathlib
-import matplotlib.pyplot as plt
-import pywt
 from scipy import signal
 from scipy.fft import fft, ifft, fftfreq
-from scipy.signal import detrend, butter, filtfilt
-from scipy.linalg import hankel, svd, eig, toeplitz
-from IPython.display import display
-from sigepy import utils
-from collections import OrderedDict
-from typing import Tuple,Dict, Union, List
-from dataclasses import dataclass, field
-from tqdm import tqdm
-import gc
+from typing import List
 from plotly import graph_objs as go
+import matplotlib.pyplot as plt
 
 
-def calculate_fft(df: pd.DataFrame, labels: List[str], magnitude_type: str='calculated', magnitude_factor: float=1.0) -> pd.DataFrame:
+def calculate_fft(
+    df: pd.DataFrame, labels: List[str], magnitude_type: str = "calculated", magnitude_factor: float = 1.0
+) -> pd.DataFrame:
     """
-    Calculates the FFT of multiple acceleration data columns and returns a DataFrame with the results.
+    Calculates the FFT of multiple acceleration data columns.
 
     Args:
         df: DataFrame containing 'Time' and '{label} Acceleration' columns.
-        labels: List of labels of the vibration (e.g., ['X', 'Y', 'Z']).
-        magnitude_type: 'calculated' or 'normalized'
-        magnitude_factor: float number to be used as reference to normalize the fft spectrum. Only works
-            with magnitude_type = 'normalized'
+        labels: List of labels (e.g., ['X', 'Y', 'Z']).
+        magnitude_type: 'calculated' or 'normalized'.
+        magnitude_factor: Factor to normalize the FFT spectrum (used when magnitude_type is 'normalized').
 
     Returns:
         DataFrame containing the FFT results with 'Frequency' and '{label} Magnitude' columns for each label.
@@ -47,31 +30,27 @@ def calculate_fft(df: pd.DataFrame, labels: List[str], magnitude_type: str='calc
     n = len(df["Time"])
     time_step = df["Time"].iloc[1] - df["Time"].iloc[0]
     sampling_rate = 1 / time_step
-    frequencies = np.fft.fftfreq(n, 1 / sampling_rate)
+    frequencies = fftfreq(n, 1 / sampling_rate)
 
     result["Frequency"] = frequencies[: n // 2]
 
     for label in labels:
-        accelerations = np.fft.fft(df[f"{label} Acceleration"])
+        accelerations = fft(df[f"{label} Acceleration"])
         magnitudes = np.abs(accelerations)
 
-        if magnitude_type == 'normalized':
+        if magnitude_type == "normalized":
             modified_magnitudes = magnitudes / np.max(magnitudes) * magnitude_factor
-        elif magnitude_type == 'calculated':
+        elif magnitude_type == "calculated":
             modified_magnitudes = magnitudes
         else:
-            raise ValueError("'normalized' or 'calculated'")
+            raise ValueError("magnitude_type must be 'normalized' or 'calculated'")
 
         result[f"{label} Magnitude"] = modified_magnitudes[: n // 2]
 
     return result
 
 
-def filter_with_fft(
-    df: pd.DataFrame,
-    labels: List[str],
-    threshold: float,
-) -> pd.DataFrame:
+def filter_with_fft(df: pd.DataFrame, labels: List[str], threshold: float) -> pd.DataFrame:
     """
     Filters FFT output by zeroing frequencies with magnitudes below a threshold and reconstructs the filtered signal for multiple labels.
 
@@ -92,18 +71,13 @@ def filter_with_fft(
         raise ValueError("threshold must be between 0 and 100.")
 
     for label in labels:
-        # Clarity: Apply FFT to the acceleration data for the current label.
         fft_data = fft(df[f"{label} Acceleration"])
         magnitude = np.abs(fft_data)
-
-        # Clarity: Calculate the threshold value based on the maximum magnitude and the specified threshold percentage.
         threshold_value = np.max(magnitude) * threshold / 100
 
-        # Clarity: Create a copy of the FFT data to apply the filter.
         fft_filtered = fft_data.copy()
         fft_filtered[magnitude < threshold_value] = 0
 
-        # Clarity: Apply inverse FFT to reconstruct the filtered acceleration data.
         df[f"{label} Filtered Acceleration"] = ifft(fft_filtered).real
 
     return df
@@ -114,7 +88,7 @@ def plot_normalized_fft_results(df: pd.DataFrame, label: str, color: str = "red"
     Plots the normalized FFT magnitude spectrum from a DataFrame.
 
     Args:
-        df: DataFrame containing '{label} Frequency' and '{label} Magnitude' columns.
+        df: DataFrame containing 'Frequency' and '{label} Magnitude' columns.
         label: The label of the vibration (e.g., 'X', 'Y', 'Z').
         color: Color of the plot line (default is 'red').
 
@@ -126,16 +100,11 @@ def plot_normalized_fft_results(df: pd.DataFrame, label: str, color: str = "red"
     """
     frequencies = df["Frequency"]
     magnitudes = df[f"{label} Magnitude"]
+    normalized_magnitudes = magnitudes / np.max(magnitudes)
 
     plt.figure(figsize=(10, 6))
-    plt.plot(
-        frequencies[:],
-        magnitudes[:] / max(magnitudes[:]),
-        color=color,
-        linestyle="-",
-        label=label,
-    )
-    plt.title("FFT Normalized Magnitude Spectrum ")
+    plt.plot(frequencies, normalized_magnitudes, color=color, linestyle="-", label=label)
+    plt.title("FFT Normalized Magnitude Spectrum")
     plt.xlabel("Frequency (Hz)")
     plt.ylabel("Magnitude")
     plt.grid(True)
@@ -145,7 +114,7 @@ def plot_normalized_fft_results(df: pd.DataFrame, label: str, color: str = "red"
 
 def plot_fft_results(df: pd.DataFrame, label: str, color: str = "red") -> None:
     """
-    Plots the FFT magnitude spectrum from a DataFrame and saves the figure.
+    Plots the FFT magnitude spectrum from a DataFrame.
 
     Args:
         df: DataFrame containing 'Frequency' and '{label} Magnitude' columns.
@@ -162,8 +131,8 @@ def plot_fft_results(df: pd.DataFrame, label: str, color: str = "red") -> None:
     magnitudes = df[f"{label} Magnitude"]
 
     plt.figure(figsize=(10, 6))
-    plt.plot(frequencies[:], magnitudes[:], color=color, linestyle="-", label=label)
-    plt.title("FFT Magnitude Spectrum ")
+    plt.plot(frequencies, magnitudes, color=color, linestyle="-", label=label)
+    plt.title("FFT Magnitude Spectrum")
     plt.xlabel("Frequency (Hz)")
     plt.ylabel("Magnitude")
     plt.grid(True)
@@ -173,7 +142,7 @@ def plot_fft_results(df: pd.DataFrame, label: str, color: str = "red") -> None:
 
 def plot_fft_results_period_domain(df: pd.DataFrame, label: str, color: str = "red", log_scale: bool = False) -> None:
     """
-    Plots the FFT magnitude spectrum from a DataFrame and saves the figure.
+    Plots the FFT magnitude spectrum in the period domain.
 
     Args:
         df: DataFrame containing 'Frequency' and '{label} Magnitude' columns.
@@ -189,14 +158,13 @@ def plot_fft_results_period_domain(df: pd.DataFrame, label: str, color: str = "r
     """
     frequencies = df["Frequency"]
     magnitudes = df[f"{label} Magnitude"]
-
     periods = 1 / frequencies
 
     plt.figure(figsize=(10, 6))
     plt.plot(periods, magnitudes, color=color, linestyle="-", label=label)
 
     if log_scale:
-        plt.xscale('log')
+        plt.xscale("log")
 
     plt.title("FFT Period Domain Spectrum")
     plt.xlabel("T (s)")
@@ -210,8 +178,8 @@ def plot_fft_results_period_domain(df: pd.DataFrame, label: str, color: str = "r
 def plot_peaks(
     df: pd.DataFrame,
     label: str,
-    height: float=1,
-    distance: float=1,
+    height: float = 1,
+    distance: float = 1,
     log_scale: bool = False,
     file_location: str = "results/fft_peaks.png",
 ):
@@ -236,20 +204,15 @@ def plot_peaks(
 
     plt.figure(figsize=(10, 6))
     plt.plot(frequencies, magnitudes, label=label)
-    plt.plot(
-        frequencies[peaks_scipy],
-        magnitudes[peaks_scipy],
-        "o",
-        label="Peaks",
-    )
+    plt.plot(frequencies[peaks_scipy], magnitudes[peaks_scipy], "o", label="Peaks")
 
     for peak in peaks_scipy:
         plt.annotate(
             f"{frequencies[peak]:.2f}",
             (frequencies[peak], magnitudes[peak]),
             textcoords="offset points",
-            xytext=(10, 0),  # Offset to the right of the marker
-            ha='left'
+            xytext=(10, 0),
+            ha="left",
         )
 
     if log_scale:
@@ -262,6 +225,7 @@ def plot_peaks(
     plt.grid(True)
     plt.savefig(file_location)
     plt.show()
+
 
 def plotly_normalized_fft_results(df: pd.DataFrame, label: str, color: str = "red") -> go.Figure:
     """
@@ -303,7 +267,7 @@ def plotly_normalized_fft_results(df: pd.DataFrame, label: str, color: str = "re
 
 def plotly_fft_results(df: pd.DataFrame, label: str, color: str = "red") -> go.Figure:
     """
-    Plots the FFT magnitude spectrum from a DataFrame using Plotly and saves the figure.
+    Plots the FFT magnitude spectrum from a DataFrame using Plotly.
 
     Args:
         df: DataFrame containing 'Frequency' and '{label} Magnitude' columns.
@@ -342,7 +306,7 @@ def plotly_fft_results_period_domain(
     df: pd.DataFrame, label: str, color: str = "red", log_scale: bool = False
 ) -> go.Figure:
     """
-    Plots the FFT magnitude spectrum in the period domain from a DataFrame using Plotly and saves the figure.
+    Plots the FFT magnitude spectrum in the period domain using Plotly.
 
     Args:
         df: DataFrame containing 'Frequency' and '{label} Magnitude' columns.
@@ -355,7 +319,6 @@ def plotly_fft_results_period_domain(
     """
     frequencies = df["Frequency"]
     magnitudes = df[f"{label} Magnitude"]
-
     periods = 1 / frequencies
 
     fig = go.Figure()
@@ -416,9 +379,9 @@ def plotly_peaks(
             y=magnitudes[peaks_scipy],
             mode="markers+text",
             marker=dict(size=8),
-            text=[f"{freq:.2f} Hz" for freq in frequencies[peaks_scipy]],  # Etiquetas en los picos
+            text=[f"{freq:.2f} Hz" for freq in frequencies[peaks_scipy]],
             textposition="top center",
-            name="Peaks"
+            name="Peaks",
         )
     )
 

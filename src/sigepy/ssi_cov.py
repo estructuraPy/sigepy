@@ -1,17 +1,16 @@
 import numpy as np
 import pandas as pd
-from scipy.linalg import hankel, svd, eig
-from numpy.typing import NDArray
-import numpy as np
 from scipy import signal
-from scipy.linalg import hankel, svd, eig
+from scipy.linalg import svd
 from collections import OrderedDict
-from typing import Tuple,Dict
+from typing import Tuple, Dict
 from dataclasses import dataclass
-from tqdm import tqdm # type: ignore
+from tqdm import tqdm
 import gc
-from matplotlib import pyplot as plt
 import plotly.graph_objects as go
+import matplotlib.pyplot as plt
+from numpy.typing import NDArray
+
 
 def construct_and_svd_block_toeplitz(impulse_response_function: NDArray) -> Tuple[NDArray, NDArray, NDArray, NDArray]:
     """
@@ -34,11 +33,9 @@ def construct_and_svd_block_toeplitz(impulse_response_function: NDArray) -> Tupl
     irf_length = impulse_response_function.shape[2]
     block_size = number_channels
     num_blocks = irf_length - 1
-    
-    # Initialize lists to store blocks
+
     blocks = []
 
-    # Progress bar for Toeplitz matrix consrtruction
     with tqdm(total=num_blocks * num_blocks, desc="Building Toeplitz Matrix", unit="block") as pbar:
         for i in range(num_blocks):
             row_blocks = []
@@ -49,15 +46,14 @@ def construct_and_svd_block_toeplitz(impulse_response_function: NDArray) -> Tupl
                     row_blocks.append(np.zeros_like(impulse_response_function[:, :, 0]))
                 pbar.update(1)
             blocks.append(row_blocks)
-    # Concatenate blocks to form the block Toeplitz matrix
+
     block_toeplitz_matrix = np.block(blocks)
-    del blocks  # Free up memory
+    del blocks
     gc.collect()
-    
-    # Perform Singular Value Decomposition
+
     U, S, V = svd(block_toeplitz_matrix)
     gc.collect()
-    
+
     return U, S, V, block_toeplitz_matrix
 
 
@@ -95,14 +91,14 @@ class SSICov:
         if self.max_model_order <= self.min_model_order:
             raise ValueError("max_model_order must be greater than min_model_order")
 
-        self.delta_t = self.df['Time'].iloc[1] - self.df['Time'].iloc[0]
+        self.delta_t = self.df["Time"].iloc[1] - self.df["Time"].iloc[0]
         self.fs = 1 / self.delta_t
-        self.total_time = self.df['Time'].iloc[-1] - self.df['Time'].iloc[0]
+        self.total_time = self.df["Time"].iloc[-1] - self.df["Time"].iloc[0]
         self.number_samples = int(round(self.total_time * self.fs))
         self.number_channels = len(self.acceleration_labels)
         self.df_acceleration = pd.DataFrame()
         for channel, label in enumerate(self.acceleration_labels):
-            self.df_acceleration[f'Channel {channel}'] = self.df[f'{label} Acceleration'].values
+            self.df_acceleration[f"Channel {channel}"] = self.df[f"{label} Acceleration"].values
 
     def compute_impulse_response_function(self) -> NDArray:
         """
@@ -119,16 +115,19 @@ class SSICov:
         """
         delta_t = 1 / self.fs
         number_samples = round(self.total_time / delta_t)
-        impulse_response_function = np.zeros((self.number_channels, self.number_channels, number_samples - 1), dtype=complex)
+        impulse_response_function = np.zeros(
+            (self.number_channels, self.number_channels, number_samples - 1), dtype=complex
+        )
 
-        # Bar progress for IRF computation
         with tqdm(total=self.number_channels * self.number_channels, desc="Computing IRF", unit="channel pair") as pbar:
             for channel_1 in range(self.number_channels):
                 for channel_2 in range(self.number_channels):
-                    fft_channel_1 = np.fft.fft(self.df_acceleration[f'Channel {channel_1}'])
-                    fft_channel_2 = np.fft.fft(self.df_acceleration[f'Channel {channel_2}'])
+                    fft_channel_1 = np.fft.fft(self.df_acceleration[f"Channel {channel_1}"])
+                    fft_channel_2 = np.fft.fft(self.df_acceleration[f"Channel {channel_2}"])
                     cross_spectrum = np.fft.ifft(fft_channel_1 * fft_channel_2.conj())
-                    impulse_response_function[channel_1, channel_2, :] = np.real(cross_spectrum[0:number_samples - 1])
+                    impulse_response_function[channel_1, channel_2, :] = np.real(
+                        cross_spectrum[0 : number_samples - 1]
+                    )
                     pbar.update(1)
 
         if self.number_channels == 1:
@@ -156,7 +155,14 @@ class SSICov:
         """
         return construct_and_svd_block_toeplitz(impulse_response_function)
 
-    def identify_modal_parameters(self, left_singular_vectors: NDArray, singular_values: NDArray, num_modes: int, num_sensors: int, sampling_frequency: float) -> Tuple[NDArray, NDArray, NDArray]:
+    def identify_modal_parameters(
+        self,
+        left_singular_vectors: NDArray,
+        singular_values: NDArray,
+        num_modes: int,
+        num_sensors: int,
+        sampling_frequency: float,
+    ) -> Tuple[NDArray, NDArray, NDArray]:
         """
         Identifies modal parameters (natural frequencies, damping ratios, and mode shapes) from SVD results.
 
@@ -186,26 +192,41 @@ class SSICov:
             num_modes = singular_values_diag.shape[0]
 
         time_step = 1 / sampling_frequency
-        observability_matrix = np.matmul(left_singular_vectors[:, 0:num_modes], np.sqrt(singular_values_diag[0:num_modes, 0:num_modes]))
+        observability_matrix = np.matmul(
+            left_singular_vectors[:, 0:num_modes], np.sqrt(singular_values_diag[0:num_modes, 0:num_modes])
+        )
         index_observability = min(num_sensors, observability_matrix.shape[0])
         C_matrix = observability_matrix[0:index_observability, :]
         num_blocks = observability_matrix.shape[0] / index_observability
         ao = int((index_observability) * (num_blocks - 1))
         bo = int(len(observability_matrix[:, 0]) - (index_observability) * (num_blocks - 1))
         co = len(observability_matrix[:, 0])
-        state_matrix = np.matmul(np.linalg.pinv(observability_matrix[0:ao, :]), observability_matrix[bo:co, :])
-        eigenvalues, eigenvectors = np.linalg.eig(state_matrix)
-        mu = np.log(np.diag(np.diag(eigenvalues))) / time_step
+        state_matrix = np.matmul(
+            np.linalg.pinv(observability_matrix[0:ao, :]), observability_matrix[bo:co, :]
+        )
+        eigenvalues = np.linalg.eigvals(state_matrix)
+        mu = np.log(eigenvalues) / time_step
         natural_frequencies_all = np.abs(mu) / (2 * np.pi)
-        natural_frequencies = natural_frequencies_all[np.ix_(*[range(0, i, 2) for i in natural_frequencies_all.shape])]
+        natural_frequencies = natural_frequencies_all[
+            np.ix_(*[range(0, i, 2) for i in natural_frequencies_all.shape])
+        ]
         damping_ratios_all = -np.real(mu) / np.abs(mu)
         damping_ratios = damping_ratios_all[np.ix_(*[range(0, i, 2) for i in damping_ratios_all.shape])]
+        eigenvectors = np.linalg.eig(state_matrix)[1]
         mode_shapes_all = np.real(np.matmul(C_matrix[0:index_observability, :], eigenvectors))
         mode_shapes = mode_shapes_all[:, 1::2]
 
         return natural_frequencies, damping_ratios, mode_shapes
 
-    def perform_stability_checks(self, prev_frequencies: NDArray, prev_damping_ratios: NDArray, prev_mode_shapes: NDArray, curr_frequencies: NDArray, curr_damping_ratios: NDArray, curr_mode_shapes: NDArray) -> Tuple[NDArray, NDArray, NDArray, NDArray, NDArray]:
+    def perform_stability_checks(
+        self,
+        prev_frequencies: NDArray,
+        prev_damping_ratios: NDArray,
+        prev_mode_shapes: NDArray,
+        curr_frequencies: NDArray,
+        curr_damping_ratios: NDArray,
+        curr_mode_shapes: NDArray,
+    ) -> Tuple[NDArray, NDArray, NDArray, NDArray, NDArray]:
         """
         Performs stability checks based on frequency, damping, and mode shape.
 
@@ -228,9 +249,9 @@ class SSICov:
         Assumptions:
             - Input modal parameters are from models of adjacent orders.
         """
-        eps_freq = 1e-2  # Umbral original de variación de frecuencia
+        eps_freq = 1e-2
         eps_zeta = 4e-2
-        eps_MAC = 1e-2  # Umbral original de variación de MAC
+        eps_MAC = 1e-2
         stability_status = []
         stable_frequencies = []
         stable_damping_ratios = []
@@ -242,13 +263,18 @@ class SSICov:
 
         for prev_index in range(num_prev_frequencies):
             for curr_index in range(num_curr_frequencies):
-                # Ensure indices are within bounds
                 if prev_index >= prev_mode_shapes.shape[1] or curr_index >= curr_mode_shapes.shape[1]:
                     continue
 
-                freq_stability = self.check_relative_difference(prev_frequencies[prev_index], curr_frequencies[curr_index], eps_freq)
-                damping_stability = self.check_relative_difference(prev_damping_ratios[prev_index], curr_damping_ratios[curr_index], eps_zeta)
-                mode_shape_stability, mac_value = self.compute_MAC(prev_mode_shapes[:, prev_index], curr_mode_shapes[:, curr_index], eps_MAC)
+                freq_stability = self.check_relative_difference(
+                    prev_frequencies[prev_index], curr_frequencies[curr_index], eps_freq
+                )
+                damping_stability = self.check_relative_difference(
+                    prev_damping_ratios[prev_index], curr_damping_ratios[curr_index], eps_zeta
+                )
+                mode_shape_stability, mac_value = self.compute_MAC(
+                    prev_mode_shapes[:, prev_index], curr_mode_shapes[:, curr_index], eps_MAC
+                )
 
                 if freq_stability == 0:
                     stability_status_flag = 0  # new pole
@@ -340,7 +366,14 @@ class SSICov:
 
         return reversed_dict
 
-    def extract_stable_poles(self, frequencies: Dict[int, NDArray], damping_ratios: Dict[int, NDArray], mode_shapes: Dict[int, NDArray], MAC_values: Dict[int, NDArray], stability_statuses: Dict[int, NDArray]) -> Tuple[NDArray, NDArray, NDArray, NDArray]:
+    def extract_stable_poles(
+        self,
+        frequencies: Dict[int, NDArray],
+        damping_ratios: Dict[int, NDArray],
+        mode_shapes: Dict[int, NDArray],
+        MAC_values: Dict[int, NDArray],
+        stability_statuses: Dict[int, NDArray],
+    ) -> Tuple[NDArray, NDArray, NDArray, NDArray]:
         """
         Extracts stable poles based on the stability status.
 
@@ -386,13 +419,17 @@ class SSICov:
         stable_damping_ratios = stable_damping_ratios[valid_indices]
 
         for index in range(stable_mode_shapes.shape[1]):
-            stable_mode_shapes[:, index] = stable_mode_shapes[:, index] / np.max(np.abs(stable_mode_shapes[:, index]))
+            stable_mode_shapes[:, index] = stable_mode_shapes[:, index] / np.max(
+                np.abs(stable_mode_shapes[:, index])
+            )
             if np.diff(stable_mode_shapes[0:2, index]) < 0:
                 stable_mode_shapes[:, index] = -stable_mode_shapes[:, index]
 
         return stable_frequencies, stable_damping_ratios, stable_mode_shapes, stable_MAC_values
 
-    def perform_stability_analysis(self, U: NDArray, S: NDArray) -> Tuple[Dict[int, NDArray], Dict[int, NDArray], Dict[int, NDArray], Dict[int, NDArray], Dict[int, NDArray]]:
+    def perform_stability_analysis(
+        self, U: NDArray, S: NDArray
+    ) -> Tuple[Dict[int, NDArray], Dict[int, NDArray], Dict[int, NDArray], Dict[int, NDArray], Dict[int, NDArray]]:
         """
         Performs the stability analysis over a range of model orders.
 
@@ -413,14 +450,29 @@ class SSICov:
         """
         natural_frequencies, damping_ratios, mode_shapes, MAC_values, stability_statuses = {}, {}, {}, {}, {}
         prev_frequencies, prev_damping_ratios, prev_mode_shapes = None, None, None
-        
-        with tqdm(total=self.max_model_order - self.min_model_order + 1, desc="Performing Stability Analysis", unit="model order") as pbar:
+
+        with tqdm(
+            total=self.max_model_order - self.min_model_order + 1, desc="Performing Stability Analysis", unit="model order"
+        ) as pbar:
             for iteration, model_order in enumerate(range(self.max_model_order, self.min_model_order - 1, -1)):
-                curr_frequencies, curr_damping_ratios, curr_mode_shapes = self.identify_modal_parameters(U, S, model_order, self.number_channels, self.fs)
+                curr_frequencies, curr_damping_ratios, curr_mode_shapes = self.identify_modal_parameters(
+                    U, S, model_order, self.number_channels, self.fs
+                )
 
                 if iteration > 0:
-                    stable_frequencies, stable_damping_ratios, stable_mode_shapes, stable_MAC_values, stability_status = self.perform_stability_checks(
-                        prev_frequencies, prev_damping_ratios, prev_mode_shapes, curr_frequencies, curr_damping_ratios, curr_mode_shapes
+                    (
+                        stable_frequencies,
+                        stable_damping_ratios,
+                        stable_mode_shapes,
+                        stable_MAC_values,
+                        stability_status,
+                    ) = self.perform_stability_checks(
+                        prev_frequencies,
+                        prev_damping_ratios,
+                        prev_mode_shapes,
+                        curr_frequencies,
+                        curr_damping_ratios,
+                        curr_mode_shapes,
                     )
 
                     natural_frequencies[iteration - 1] = stable_frequencies
@@ -429,12 +481,25 @@ class SSICov:
                     MAC_values[iteration - 1] = stable_MAC_values
                     stability_statuses[iteration - 1] = stability_status
 
-                prev_frequencies, prev_damping_ratios, prev_mode_shapes = curr_frequencies, curr_damping_ratios, curr_mode_shapes
+                prev_frequencies, prev_damping_ratios, prev_mode_shapes = (
+                    curr_frequencies,
+                    curr_damping_ratios,
+                    curr_mode_shapes,
+                )
                 pbar.update(1)
 
         return natural_frequencies, damping_ratios, mode_shapes, MAC_values, stability_statuses
 
-    def execute_ssicov_analysis(self) -> Tuple[NDArray, NDArray, NDArray, NDArray, Dict[int, NDArray], Dict[int, NDArray]]:
+    def execute_ssicov_analysis(
+        self,
+    ) -> Tuple[
+        NDArray,
+        NDArray,
+        NDArray,
+        NDArray,
+        Dict[int, NDArray],
+        Dict[int, NDArray],
+    ]:
         """
         Executes the complete SSICOV analysis.
 
@@ -455,17 +520,30 @@ class SSICov:
         """
         impulse_response_function = self.compute_impulse_response_function()
         U, S, V, _ = self.construct_block_toeplitz(impulse_response_function)
-        natural_frequencies, damping_ratios, mode_shapes, MAC_values, stability_statuses = self.perform_stability_analysis(U, S)
+        (
+            natural_frequencies,
+            damping_ratios,
+            mode_shapes,
+            MAC_values,
+            stability_statuses,
+        ) = self.perform_stability_analysis(U, S)
         natural_frequencies = self.reverse_dictionary(natural_frequencies)
         damping_ratios = self.reverse_dictionary(damping_ratios)
         mode_shapes = self.reverse_dictionary(mode_shapes)
         MAC_values = self.reverse_dictionary(MAC_values)
         stability_statuses = self.reverse_dictionary(stability_statuses)
-        stable_frequencies, stable_damping_ratios, stable_mode_shapes, stable_MAC_values = self.extract_stable_poles(
-            natural_frequencies, damping_ratios, mode_shapes, MAC_values, stability_statuses
+        stable_frequencies, stable_damping_ratios, stable_mode_shapes, stable_MAC_values = (
+            self.extract_stable_poles(natural_frequencies, damping_ratios, mode_shapes, MAC_values, stability_statuses)
         )
 
-        return stable_frequencies, stable_damping_ratios, stable_mode_shapes, stable_MAC_values, stability_statuses, natural_frequencies
+        return (
+            stable_frequencies,
+            stable_damping_ratios,
+            stable_mode_shapes,
+            stable_MAC_values,
+            stability_statuses,
+            natural_frequencies,
+        )
 
     def calculate_cpsd(
         self,
@@ -492,7 +570,6 @@ class SSICov:
         N = len(frequency_axis_id)
         return frequency_axis_id, trace_spectrum_xx, N
 
-
     def plot_stability_diagram(self):
         """
         Generates a stabilization diagram plot overlaid with CPSD.
@@ -500,15 +577,18 @@ class SSICov:
         Returns:
             None
         """
-        stable_frequencies, stable_damping_ratios, stable_mode_shapes, stable_MAC_values, stability_statuses, natural_frequencies = self.execute_ssicov_analysis()
+        (
+            stable_frequencies,
+            stable_damping_ratios,
+            stable_mode_shapes,
+            stable_MAC_values,
+            stability_statuses,
+            natural_frequencies,
+        ) = self.execute_ssicov_analysis()
 
         sampling_frequency = 1 / (self.df["Time"].iloc[1] - self.df["Time"].iloc[0])
-        # number_channels = len(acceleration_labels) #Variable is not used
 
-        # Clarity: Convert acceleration data to NDArray
         df_acceleration = self.df[[f"{label} Acceleration" for label in self.acceleration_labels]].values
-
-        nperseg = min(2048, df_acceleration.shape[0])
 
         frequency_axis_id, trace_spectrum_xx, N = self.calculate_cpsd(
             df_acceleration,
@@ -518,7 +598,6 @@ class SSICov:
         model_orders = np.arange(self.min_model_order, self.max_model_order + 1)
         fig, ax1 = plt.subplots()
 
-        # Plot stability_status
         markers = ["k+", "ro", "bo", "gs", "gx"]
         labels = [
             "new pole",
@@ -531,12 +610,10 @@ class SSICov:
         for jj in range(5):
             x = []
             y = []
-            for ii in tqdm(range(len(natural_frequencies)), desc=f"Processing status {jj+1}/5"):  # Algo nuevo: Progress bar
+            for ii in tqdm(range(len(natural_frequencies)), desc=f"Processing status {jj+1}/5"):
                 try:
                     ind = np.where(stability_statuses[ii] == jj)
-                    x.extend(
-                        natural_frequencies[ii][ind].flatten()
-                    )  # Flatten the array to ensure it's iterable
+                    x.extend(natural_frequencies[ii][ind].flatten())
                     y.extend([model_orders[ii]] * len(natural_frequencies[ii][ind]))
                 except Exception as e:
                     print(f"Error processing stability status: {e}")
@@ -550,19 +627,15 @@ class SSICov:
 
         max_freq = 0
         for freqs in natural_frequencies.values():
-            if (
-                len(freqs) > 0
-            ):  # Check if the array is not empty, handling cases where natural frequencies could be empty
+            if len(freqs) > 0:
                 max_freq = max(max_freq, np.max(freqs))
 
-        # Plot CPSD
         color = "blue"
         ax2.set_xlabel("frequency [Hz]")
         ax2.set_ylabel("Power Spectral Density", color=color)
-        ax2.plot(frequency_axis_id, 10 * np.log10(trace_spectrum_xx / N), color, label="Trace")
+        ax2.plot(frequency_axis_id, 10 * np.log10(np.abs(trace_spectrum_xx) / N), color, label="Trace")
         ax2.tick_params(axis="y", labelcolor=color)
         ax2.set_xlim(0, max_freq * 2)
-        # ax2.set_yscale('log') # commented out because log scale could hide details
 
         ax1.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, -0.15), ncol=5)
 
@@ -576,15 +649,18 @@ class SSICov:
         Returns:
             The Plotly figure.
         """
-        stable_frequencies, stable_damping_ratios, stable_mode_shapes, stable_MAC_values, stability_statuses, natural_frequencies = self.execute_ssicov_analysis()
+        (
+            stable_frequencies,
+            stable_damping_ratios,
+            stable_mode_shapes,
+            stable_MAC_values,
+            stability_statuses,
+            natural_frequencies,
+        ) = self.execute_ssicov_analysis()
 
         sampling_frequency = 1 / (self.df["Time"].iloc[1] - self.df["Time"].iloc[0])
-        # number_channels = len(acceleration_labels) #Variable is not used
 
-        # Clarity: Convert acceleration data to NDArray
         df_acceleration = self.df[[f"{label} Acceleration" for label in self.acceleration_labels]].values
-
-        nperseg = min(2048, df_acceleration.shape[0])
 
         frequency_axis_id, trace_spectrum_xx, N = self.calculate_cpsd(
             df_acceleration,
@@ -595,9 +671,8 @@ class SSICov:
 
         fig = go.Figure()
 
-        # Plot stability_status
-        markers = ["circle", "circle", "circle", "circle", "circle"]  # Using different shapes
-        colors = ["black", "red", "blue", "green", "purple"]  # Defining colors
+        markers = ["circle", "circle", "circle", "circle", "circle"]
+        colors = ["black", "red", "blue", "green", "purple"]
         labels = [
             "new pole",
             "stable pole",
@@ -606,15 +681,15 @@ class SSICov:
             "stable freq.",
         ]
 
-        max_pole_frequency = 0  # Variable to track the maximum frequency identified by poles
+        max_pole_frequency = 0
 
         for jj in range(5):
             x = []
             y = []
-            for ii in tqdm(range(len(natural_frequencies)), desc=f"Processing status {jj+1}/5"):  # Algo nuevo: Progress bar
+            for ii in tqdm(range(len(natural_frequencies)), desc=f"Processing status {jj+1}/5"):
                 try:
                     ind = np.where(stability_statuses[ii] == jj)
-                    x.extend(natural_frequencies[ii][ind].flatten())  # Flatten the array to ensure it's iterable
+                    x.extend(natural_frequencies[ii][ind].flatten())
                     y.extend([model_orders[ii]] * len(natural_frequencies[ii][ind]))
                     if len(natural_frequencies[ii][ind]) > 0:
                         max_pole_frequency = max(max_pole_frequency, np.max(natural_frequencies[ii][ind]))
@@ -631,23 +706,21 @@ class SSICov:
                 )
             )
 
-        # Plot CPSD
         fig.add_trace(
             go.Scatter(
                 x=frequency_axis_id,
-                y=10 * np.log10(np.abs(trace_spectrum_xx) / N),  # Use the magnitude of the complex values
+                y=10 * np.log10(np.abs(trace_spectrum_xx) / N),
                 mode="lines",
                 name="Trace CPSD",
-                yaxis="y2",  # Use the second y-axis for CPSD
+                yaxis="y2",
             )
         )
 
-        # Configure layout with dual y-axes
         fig.update_layout(
             title="Stability Diagram Overlaid with CPSD",
             xaxis_title="Frequency (Hz)",
             yaxis_title="Model Order",
-            xaxis=dict(range=[0, max_pole_frequency * 1.1]),  # Set x-axis limit to 110% of the maximum pole frequency
+            xaxis=dict(range=[0, max_pole_frequency * 1.1]),
             yaxis2=dict(title="Power Spectral Density (dB)", overlaying="y", side="right"),
             template="plotly_white",
         )
