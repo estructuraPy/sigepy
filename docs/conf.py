@@ -4,7 +4,7 @@ import os
 import sys
 import warnings
 
-# Add the source directory to the Python path so Sphinx can import modules
+# Asegurar que Sphinx pueda encontrar los módulos
 sys.path.insert(0, os.path.abspath('../../src'))
 
 # Mock imports para evitar errores con dependencias externas
@@ -17,7 +17,7 @@ author = 'Angel Navarro-Mora'
 copyright = '2025, estructuraPy'
 release = '0.1.5'
 
-# -- General configuration ---------------------------------------------------
+# Extensiones necesarias
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
@@ -33,13 +33,13 @@ autodoc_default_options = {
     'special-members': '__init__, __post_init__',
 }
 
-# Enable autosummary
+# Genera resúmenes automáticos
 autosummary_generate = True
 
 templates_path = ['_templates']
 exclude_patterns = []
 
-# -- Options for HTML output -------------------------------------------------
+# Opciones HTML
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 html_logo = 'https://github.com/estructuraPy/sigepy/raw/main/estructurapy.png'
