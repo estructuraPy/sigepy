@@ -13,33 +13,6 @@ python:
   install:
     - requirements: requirements.txt
 
-This error indicates that your .readthedocs.yaml file is missing either the build.tools or build.commands section, which are required for the build process. Here's how you can address it:
-- Add build.tools: This section specifies the tools needed for your build. For example:build:
-  tools:
-    - python
-    - pip
-
-- Add build.commands: This section defines custom commands to run during the build process. For example:build:
-  commands:
-    - make html
-
-
-You can include one or both of these sections, depending on your project's requirements. Here's an updated example of your configuration file:
-version: 2
-
-sphinx:
-  configuration: docs/conf.py
-
-formats:
-  - htmlzip
-  - pdf
-  - epub
-
-python:
-  version: "3.12"
-  install:
-    - requirements: requirements.txt
-
 build:
   os: ubuntu-22.04
   tools:
