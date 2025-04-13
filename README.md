@@ -1,4 +1,4 @@
-![EstructuraPy Logo](docs/_static/estructurapy.png)
+[EstructuraPy Logo](https://github.com/estructuraPy/sigepy/blob/main/estructurapy.png)
 
 # SigePy
 
