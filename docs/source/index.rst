@@ -15,7 +15,7 @@ operational modal data.
 :Author: Angel Navarro-Mora
 :Contact: ahnavarro@anmingenieria.com
 :Copyright: 2025, estructuraPy
-:Version: 0.1.4
+:Version: 0.1.5
 :License: MIT
 
 Key Features
