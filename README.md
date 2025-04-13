@@ -1,3 +1,5 @@
+![EstructuraPy Logo](docs/_static/estructurapy.png)
+
 # SigePy
 
 ## A Python Library for Structural Vibration Analysis
