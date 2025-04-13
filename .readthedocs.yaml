@@ -12,3 +12,6 @@ python:
   version: "3.12"
   install:
     - requirements: requirements.txt
+
+build:
+  os: ubuntu-22.04
