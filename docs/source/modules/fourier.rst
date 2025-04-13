@@ -1,6 +1,7 @@
 Fourier Analysis
 ================
-
+This module provides tools for frequency-domain analysis, enabling transformations
+of vibration signals, filtering, peak detection, and various visualizations.
 
 .. automodule:: sigepy.fourier
    :members:

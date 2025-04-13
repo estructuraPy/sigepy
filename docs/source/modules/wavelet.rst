@@ -1,5 +1,7 @@
 Wavelet Analysis
 ================
+This section provides methods for decomposing and analyzing nonstationary signals
+using wavelet transforms, including static and interactive visualizations.
 
 .. automodule:: sigepy.wavelet
    :members:
@@ -15,7 +17,7 @@ Core Analysis Functions
 .. autofunction:: sigepy.wavelet.spectrum
 
 Interactive Visualization
---------------------------
+-------------------------
 
 .. autofunction:: sigepy.wavelet.plot_interactive_wavelet_spectrum
 .. autofunction:: sigepy.wavelet.plot_spectrum_gif

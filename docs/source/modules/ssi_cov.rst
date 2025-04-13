@@ -1,5 +1,7 @@
 Stochastic Subspace Identification (SSI-COV)
 ============================================
+This method allows the estimation of modal parameters from measured data,
+including frequency, damping, and mode shapes.
 
 .. automodule:: sigepy.ssi_cov
    :members:
@@ -22,7 +24,6 @@ SSI-COV Implementation
 
 Core Analysis Methods
 ---------------------
-
 .. automethod:: sigepy.ssi_cov.SSICov.execute_ssicov_analysis
 .. automethod:: sigepy.ssi_cov.SSICov.compute_impulse_response_function
 .. automethod:: sigepy.ssi_cov.SSICov.identify_modal_parameters
@@ -30,7 +31,6 @@ Core Analysis Methods
 
 Visualization Methods
 ---------------------
-
 .. automethod:: sigepy.ssi_cov.SSICov.plot_stability_diagram
 .. automethod:: sigepy.ssi_cov.SSICov.plotly_stability_diagram
 
