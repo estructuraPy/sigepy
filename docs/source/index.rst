@@ -28,15 +28,6 @@ Key Features
 * **Wavelet Analysis**: Time-frequency analysis for non-stationary signals
 * **Signal Processing**: Time-domain analysis, filtering, and preprocessing
 
-Installation
------------
-
-Install SigePy using pip:
-
-.. code-block:: bash
-
-   pip install sigepy
-
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
