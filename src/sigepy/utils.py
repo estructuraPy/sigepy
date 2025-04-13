@@ -140,6 +140,51 @@ def import_sts_acceleration_txt(file_location: str, labels: List[str]) -> pd.Dat
     return pd.DataFrame(data)
 
 
+def import_csv_acceleration(file_location: str, labels: List[str] = None) -> pd.DataFrame:
+    """
+    Processes acceleration data from a CSV file containing multiple accelerometer readings.
+
+    Args:
+        file_location: The path to the CSV file containing the acceleration data.
+        labels: List of labels to return as series ['X', 'Y', 'Z']. If None, returns all available axes.
+
+    Returns:
+        A Pandas DataFrame containing the time and acceleration data averaged across all accelerometers.
+
+    Assumptions:
+        - The file exists and is readable
+        - CSV headers follow the pattern: Timestamp, Expected_Time, Accel{n}_X, Accel{n}_Y, Accel{n}_Z, Accel{n}_Magnitude
+        - Where n is the accelerometer number (1, 2, etc.)
+    """
+    try:
+        # Read the CSV file
+        df = pd.read_csv(file_location)
+        
+        # Create result DataFrame with time
+        result_df = pd.DataFrame({'Time': df['Expected_Time']})
+        
+        # Process axes (X, Y, Z)
+        axes = labels if labels is not None else ['X', 'Y', 'Z']
+        for axis in axes:
+            # Find all columns for this axis across accelerometers
+            axis_columns = [col for col in df.columns if f'_{axis}' in col and 'Magnitude' not in col]
+            
+            if axis_columns:
+                # Average the values across all accelerometers for this axis
+                avg_acceleration = df[axis_columns].mean(axis=1)
+                # Convert to m/s² (assuming input is in g)
+                result_df[f'{axis} Acceleration'] = avg_acceleration * 9.81
+        
+        return result_df
+        
+    except FileNotFoundError as e:
+        raise FileNotFoundError(f"File not found: {file_location}") from e
+    except pd.errors.EmptyDataError as e:
+        raise ValueError("The CSV file is empty") from e
+    except Exception as e:
+        raise IOError(f"Error processing file {file_location}: {str(e)}") from e
+    
+
 def import_cscr_fed(file_location: str, json_location: str) -> pd.DataFrame:
     """
     Imports data from a TXT file, processes it, and returns a Pandas DataFrame.
@@ -156,37 +201,43 @@ def import_cscr_fed(file_location: str, json_location: str) -> pd.DataFrame:
         - The JSON file exists and is accessible.
     """
     try:
-        json_location = os.path.abspath(json_location)  # Convert paths to absolute paths
         file_location = os.path.abspath(file_location)
-
+        json_location = os.path.abspath(json_location)  # Convert paths to absolute paths
+        
         with open(json_location, "r", encoding="utf-8") as f:  # Read the JSON of default values
             default_values = json.load(f)
-
+            
+        # Try UTF-16 encoding first
         try:
-            df = pd.read_csv(  # Attempt to read the TXT file with different encodings
-                file_location,
-                sep="\t",
-                header=None,
-                names=["T", "FED"],
-                encoding="utf-16",
-            )
-        except UnicodeDecodeError:
             df = pd.read_csv(
                 file_location,
                 sep="\t",
                 header=None,
                 names=["T", "FED"],
-                encoding="utf-8",
+                encoding="utf-16"
             )
-
-        df["T"] = pd.to_numeric(df["T"], errors="coerce")  # Clean and convert the 'T' column to numeric
-        df = df.dropna(subset=["T"])  # Remove rows with NaN values in the 'T' column
-        df["Frequency"] = 1 / df["T"]  # Calculate frequencies from the period 'T'
-        return df[["Frequency", "FED"]]  # Select the columns of interest
+        except UnicodeDecodeError:
+            # Fall back to UTF-8 if UTF-16 fails
+            df = pd.read_csv(
+                file_location,
+                sep="\t",
+                header=None,
+                names=["T", "FED"],
+                encoding="utf-8"
+            )
+            
+        # Process the data
+        df["T"] = pd.to_numeric(df["T"], errors="coerce")
+        df = df.dropna(subset=["T"])
+        df["Frequency"] = 1 / df["T"]
+        
+        return df[["Frequency", "FED"]]
+        
     except FileNotFoundError as e:
-        print(
-            f"Error: {e}. Check that the JSON file and the TXT file are in the specified path."
-        )
+        print(f"Error: {e}. Check that the JSON file and the TXT file are in the specified path.")
+        return None
+    except Exception as e:
+        print(f"Unexpected error: {e}")
         return None
 
 
@@ -213,7 +264,6 @@ def generate_vibration_signal(
         DataFrame with columns 'Time' and '{label} Acceleration'.
     """
     t = np.linspace(0, total_time, int(total_time * sampling_rate), endpoint=False)
-
     acceleration = np.zeros_like(t)
 
     for freq_input, amp_input in zip(frequency_inputs, amplitude_inputs):
@@ -221,16 +271,13 @@ def generate_vibration_signal(
             instantaneous_frequencies = freq_input(t)
         else:
             instantaneous_frequencies = np.full_like(t, freq_input)
-
         if callable(amp_input):
             instantaneous_amplitudes = amp_input(t)
         else:
             instantaneous_amplitudes = np.full_like(t, amp_input)
-
         acceleration += instantaneous_amplitudes * np.sin(
             2 * np.pi * instantaneous_frequencies * t
         )
-
     acceleration += noise_amplitude * np.random.normal(size=len(t))
 
     return pd.DataFrame({"Time": t, f"{label} Acceleration": acceleration})
@@ -263,22 +310,18 @@ def generate_vibration_signals(
 
     for label in labels:
         acceleration = np.zeros_like(t)
-
         for freq_input, amp_input in zip(frequency_inputs[label], amplitude_inputs[label]):
             if callable(freq_input):
                 instantaneous_frequencies = freq_input(t)
             else:
                 instantaneous_frequencies = np.full_like(t, freq_input)
-
             if callable(amp_input):
                 instantaneous_amplitudes = amp_input(t)
             else:
                 instantaneous_amplitudes = np.full_like(t, amp_input)
-
             acceleration += instantaneous_amplitudes * np.sin(
                 2 * np.pi * instantaneous_frequencies * t
             )
-
         acceleration += noise_amplitudes[label] * np.random.normal(size=len(t))
         df[f"{label} Acceleration"] = acceleration
 
@@ -291,7 +334,6 @@ class SignalProcessor:
     A class for processing time-series data, including filtering and baseline correction.
     Data and processing parameters are initialized upon object creation.
     """
-
     df: pd.DataFrame
     labels: List[str]
     lowcut: int = 3
@@ -356,6 +398,7 @@ class SignalProcessor:
             self.df[f"{label} Acceleration"],
             mean,
         )
+
         return self.df
 
     def baseline_correction(self) -> pd.DataFrame:
@@ -380,7 +423,6 @@ class SignalProcessor:
         """
         time_step = self.df["Time"].iloc[1] - self.df["Time"].iloc[0]
         sampling_rate = 1 / time_step
-
         nyquist = 0.5 * sampling_rate
         low = self.lowcut / nyquist
         high = self.highcut / nyquist
@@ -405,7 +447,7 @@ class SignalProcessor:
         self.df = self.filter_time_window()
         self.df = self.baseline_correction()
         return self.butter_bandpass_filter()
-    
+
 
 def plot_acceleration(df: pd.DataFrame, label: str, color: str = "red"):
     """
@@ -427,7 +469,6 @@ def plot_acceleration(df: pd.DataFrame, label: str, color: str = "red"):
         linestyle="-",
         label=label,
     )
-
     plt.title(f"{label} Acceleration")
     plt.xlabel("Time (s)")
     plt.ylabel(r"Acceleration ($m/s^{2}$)")
@@ -458,47 +499,11 @@ def plotly_acceleration(df: pd.DataFrame, label: str, color: str = "red") -> go.
             line=dict(color=color),
         )
     )
-
     fig.update_layout(
         title=f"{label} Acceleration",
         xaxis_title="Time (s)",
         yaxis_title="Acceleration (m/s^2)",
         template="plotly_white",
     )
-
-    fig.write_html(f"results/{label} Acceleration.html")
-    return fig
-
-
-def plotly_acceleration(df: pd.DataFrame, label: str, color: str = "red") -> go.Figure:
-    """
-    Plots the acceleration signal from a DataFrame using Plotly.
-
-    Args:
-        df: DataFrame containing 'Time' and '{label} Acceleration' columns.
-        label: Direction of the acceleration signal to plot.
-        color: Color of the plot line.
-
-    Returns:
-        The Plotly figure.
-    """
-    fig = go.Figure()
-    fig.add_trace(
-        go.Scatter(
-            x=df["Time"],
-            y=df[f"{label} Acceleration"],
-            mode="lines",
-            name=label,
-            line=dict(color=color),
-        )
-    )
-
-    fig.update_layout(
-        title=f"{label} Acceleration",
-        xaxis_title="Time (s)",
-        yaxis_title="Acceleration (m/s^2)",
-        template="plotly_white",
-    )
-
     fig.write_html(f"results/{label} Acceleration.html")
     return fig

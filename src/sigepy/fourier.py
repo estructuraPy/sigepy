@@ -16,7 +16,7 @@ from scipy.fft import fft, ifft, fftfreq
 from scipy.signal import detrend, butter, filtfilt
 from scipy.linalg import hankel, svd, eig, toeplitz
 from IPython.display import display
-from signalepy import utils
+from sigepy import utils
 from collections import OrderedDict
 from typing import Tuple,Dict, Union, List
 from dataclasses import dataclass, field

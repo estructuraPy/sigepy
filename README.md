@@ -1,45 +1,50 @@
 # SigePy
 
-## A Comprehensive Signal Processing Library for Python
+## A Python Library for Structural Vibration Analysis
 
-SigePy is an advanced Python library dedicated to signal processing tasks across various domains including audio processing, biomedical signal analysis, telecommunications, and general time series analysis.
+SigePy is an advanced Python library specialized in structural vibration analysis and system identification, with robust capabilities for processing experimental and operational modal data. It's particularly suited for civil/mechanical engineers, researchers, and practitioners working with structural health monitoring, modal analysis, and vibration-based damage detection.
 
 ## Core Capabilities
 
+### System Identification and Modal Analysis
+- **SSI-COV**: Covariance-driven Stochastic Subspace Identification
+  - Automated model order selection
+  - Stabilization diagrams
+  - Modal parameter extraction
+- **SSI-DATA**: Data-driven Stochastic Subspace Identification
+- **Operational Modal Analysis**: Output-only modal identification
+- **Modal Validation**: MAC, COMAC, and mode complexity indicators
+
 ### Time Domain Analysis
-- **Statistical Analysis**: Mean, variance, skewness, kurtosis, correlation functions
-- **Peak Detection**: Multiple algorithms including local maxima/minima and threshold-based methods
-- **Envelope Detection**: Hilbert transform and other envelope extraction techniques
-- **Feature Extraction**: Zero-crossing rate, energy, entropy
+- **Statistical Analysis**: RMS, crest factor, kurtosis for vibration assessment
+- **Peak Detection**: Impact and transient response identification
+- **Envelope Analysis**: Structural response characterization
+- **Feature Extraction**: Time-domain vibration indicators
 
 ### Frequency Domain Analysis
-- **Fourier Transforms**: Fast Fourier Transform (FFT) implementations based on the Cooley-Tukey algorithm
-- **Spectral Analysis**: Power Spectral Density (PSD), spectrograms
-- **Harmonic Analysis**: Fundamental frequency estimation, harmonic-to-noise ratio
+- **Fourier Analysis**: Enhanced FFT for structural dynamics
+- **Spectral Analysis**: Power Spectral Density (PSD), FRF computation
+- **Modal Parameters**: Natural frequencies and damping estimation
+- **Order Analysis**: For rotating machinery diagnostics
 
 ### Time-Frequency Analysis
-- **Short-Time Fourier Transform (STFT)**: Windowed Fourier analysis
-- **Wavelet Transforms**: Continuous Wavelet Transform (CWT) and Discrete Wavelet Transform (DWT)
-- **Empirical Mode Decomposition (EMD)**: Adaptive decomposition for non-stationary signals
+- **Short-Time Fourier Transform (STFT)**: Non-stationary response analysis
+- **Wavelet Analysis**: Damage localization and transient detection
+- **EMD/HHT**: Hilbert-Huang Transform for nonlinear systems
 
-### Filtering
-- **FIR Filters**: Window-based and Parks-McClellan optimal design
-- **IIR Filters**: Butterworth, Chebyshev, Elliptic filter implementations
-- **Adaptive Filters**: LMS, RLS, Kalman filtering
-
-### Signal Enhancement
-- **Noise Reduction**: Spectral subtraction, Wiener filtering
-- **Deconvolution**: Blind and non-blind techniques
-- **Signal Separation**: Independent Component Analysis (ICA)
+### Signal Processing
+- **FIR/IIR Filters**: Digital filtering for noise reduction
+- **Adaptive Filtering**: LMS, RLS algorithms
+- **Signal Enhancement**: Advanced denoising techniques
 
 ## Technical Implementation
 
-SignalePy leverages NumPy, SciPy, and optimized C/C++ extensions for maximum performance. The library emphasizes:
+SigePy leverages NumPy, SciPy, and optimized C/C++ extensions for maximum performance in:
 
-- Memory efficiency for large datasets
-- Parallelization for multi-core processing
-- GPU acceleration for selected algorithms
-- Comprehensive validation against industry standards
+- Real-time structural monitoring
+- Multi-channel sensor arrays
+- Large-scale vibration data
+- High-frequency sampling applications
 
 ## Installation
 
@@ -50,33 +55,56 @@ pip install signalepy
 ## Basic Usage
 
 ```python
-import signalepy as sp
+import siglepy as sp
 import numpy as np
 
-# Generate a test signal
-fs = 1000  # Sampling frequency (Hz)
-t = np.arange(0, 1, 1/fs)
-signal = np.sin(2*np.pi*50*t) + 0.5*np.sin(2*np.pi*120*t) + 0.1*np.random.randn(len(t))
+# Load acceleration data
+data = np.loadtxt('structural_response.txt')
+fs = 100  # Sampling frequency (Hz)
 
-# Apply a bandpass filter
-filtered = sp.filters.bandpass(signal, lowcut=40, highcut=60, fs=fs, order=4)
+# Perform SSI-COV analysis
+frequencies, damping, modes = sp.modal.ssi_cov(
+    data,
+    fs=fs,
+    n_block_rows=40,
+    system_order=50
+)
 
-# Perform FFT analysis
-frequencies, spectrum = sp.fft.magnitude_spectrum(signal, fs=fs)
+# Calculate Modal Assurance Criterion
+mac_matrix = sp.modal.mac(modes)
 
-# Compute spectrogram
-time_bins, freq_bins, Sxx = sp.timefreq.spectrogram(signal, fs=fs, window='hann', nperseg=256)
+# Generate stabilization diagram
+sp.modal.plot_stabilization(
+    frequencies, 
+    damping,
+    show_stable=True
+)
+
+# Operational Modal Analysis
+modal_params = sp.modal.oma(
+    data,
+    fs=fs,
+    method='ssi-cov',
+    n_modes=5
+)
 ```
+
+## Application Areas
+
+- Structural Health Monitoring
+- Bridge and Building Dynamics
+- Seismic Response Analysis
+- Wind-induced Vibrations
+- Machine Foundation Analysis
+- Modal Testing and Analysis
 
 ## References
 
-The implementation is based on established signal processing literature:
-
-1. Oppenheim, A.V. & Schafer, R.W. (2009). *Discrete-Time Signal Processing* (3rd ed.). Prentice Hall.
-2. Proakis, J.G. & Manolakis, D.G. (2006). *Digital Signal Processing* (4th ed.). Prentice Hall.
-3. Mallat, S. (2008). *A Wavelet Tour of Signal Processing: The Sparse Way* (3rd ed.). Academic Press.
-4. Haykin, S. (2013). *Adaptive Filter Theory* (5th ed.). Pearson.
-5. Cohen, L. (1995). *Time-Frequency Analysis*. Prentice Hall.
+1. Peeters, B., & De Roeck, G. (1999). *Reference-based stochastic subspace identification for output-only modal analysis*. Mechanical Systems and Signal Processing.
+2. Brincker, R., & Ventura, C. (2015). *Introduction to Operational Modal Analysis*. Wiley.
+3. Ewins, D.J. (2000). *Modal Testing: Theory, Practice and Application*. Research Studies Press.
+4. Rainieri, C., & Fabbrocino, G. (2014). *Operational Modal Analysis of Civil Engineering Structures*. Springer.
+5. Oppenheim, A.V. & Schafer, R.W. (2009). *Discrete-Time Signal Processing*. Prentice Hall.
 
 ## Documentation
 

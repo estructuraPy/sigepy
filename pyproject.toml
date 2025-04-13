@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sigepy"
-version = "0.1.0"
+version = "0.1.1"
 authors = [
     { name = "Angel Navarro-Mora", email = "ahnavarro@anmingeniería.com" },
 ]
@@ -25,4 +25,4 @@ packages = ["sigepy"]
 package-dir = {"" = "src"}
 
 [tool.setuptools.package-data]
-timber_nds = ["tests/*.py"]
+sigepy = ["tests/*.py"]
