@@ -1,5 +1,5 @@
 SigePy Package Documentation
-===========================
+==================================================================================================
 
 SigePy is a Python library for structural vibration analysis, providing tools for:
 
@@ -20,7 +20,7 @@ This documentation contains detailed API references for all modules.
    modules/utils
 
 Modules
-=======
+==================================================================================================
 
 .. automodule:: sigepy.fourier
     :members:
