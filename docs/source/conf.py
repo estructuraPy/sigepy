@@ -6,7 +6,7 @@
 import os
 import sys
 
-# This path should point from 'docs/source' up two levels and then into 'src'
+# Adjust the path to point to the 'src' directory relative to 'docs/source'
 sys.path.insert(0, os.path.abspath('../../src'))
 
 # -- Project information -----------------------------------------------------
