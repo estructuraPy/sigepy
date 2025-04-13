@@ -9,8 +9,9 @@ sys.path.insert(0, os.path.abspath('../../src'))
 # -- Project information -----------------------------------------------------
 
 project = 'SigePy'
-copyright = '2025, Angel Navarro-Mora'
+copyright = '2025, estructuraPy'
 author = 'Angel Navarro-Mora'
+release = '0.1.4'
 
 # -- General configuration ---------------------------------------------------
 

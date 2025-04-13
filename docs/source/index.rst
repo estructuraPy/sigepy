@@ -12,6 +12,12 @@ Welcome to SigePy's Documentation
 and system identification, with robust capabilities for processing experimental and 
 operational modal data.
 
+:Author: Angel Navarro-Mora
+:Contact: ahnavarro@anmingenieria.com
+:Copyright: 2025, estructuraPy
+:Version: 0.1.4
+:License: MIT
+
 Key Features
 -----------
 
