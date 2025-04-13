@@ -33,25 +33,3 @@ Modules
 
 .. automodule:: sigepy.utils
     :members:
-
-SigePy Modules
-=============
-
-.. toctree::
-   :maxdepth: 2
-   :caption: API Reference:
-
-   modules/fourier
-   modules/ssi_cov
-   modules/utils
-   modules/wavelet
-
-Module Overview
--------------
-
-SigePy includes the following key modules:
-
-* **fourier**: Functions for Fourier analysis, FFT computation, and frequency domain processing
-* **ssi_cov**: Implementation of Stochastic Subspace Identification (SSI-COV) for modal analysis
-* **utils**: Utility functions for data handling, signal generation, and preprocessing
-* **wavelet**: Tools for time-frequency analysis using wavelets
