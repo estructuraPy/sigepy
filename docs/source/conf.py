@@ -29,3 +29,6 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
+
+# Ensure that the module documentation can be found
+html_extra_path = ['modules']

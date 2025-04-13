@@ -23,8 +23,8 @@ Key Features
 
 * **Fourier Analysis**: Enhanced FFT for structural dynamics, peak detection, and spectral analysis
 * **Stochastic Subspace Identification**: Covariance-driven SSI for modal identification
-* **Signal Processing**: Time-domain analysis, filtering, and preprocessing
 * **Wavelet Analysis**: Time-frequency analysis for non-stationary signals
+* **Signal Processing**: Time-domain analysis, filtering, and preprocessing
 
 Installation
 -----------
