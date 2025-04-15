@@ -42,7 +42,7 @@ SigePy it's a Python development of estructuraPy a trademark of ANM Ingenieria h
    modules/fourier
    modules/ssi_cov
    modules/wavelet
-   modules/signal_processing
+   modules/utils
 
 Indices and tables
 ==================
