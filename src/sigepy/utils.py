@@ -1,3 +1,25 @@
+"""
+Utility module providing support functions for signal processing operations.
+
+This module contains various utility functions used across the sigepy package, including:
+- File handling and path management
+- Data import from various file formats
+- Signal generation for testing and simulation
+- Signal preprocessing and filtering operations
+- Data visualization utilities
+- Acceleration data processing
+
+Key Classes:
+    SignalProcessor: Class for processing time-series data with filtering and corrections
+
+Key Functions:
+    import_sts_acceleration_txt: Imports acceleration data from TXT files
+    import_csv_acceleration: Imports acceleration data from CSV files
+    import_cscr_fed: Imports data from TXT files with specific format
+    generate_vibration_signal: Generates synthetic vibration signals
+    generate_vibration_signals: Generates multiple synthetic vibration signals
+"""
+
 import pathlib
 import pandas as pd
 import numpy as np

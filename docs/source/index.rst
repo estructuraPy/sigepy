@@ -4,7 +4,7 @@ Welcome to SigePy's Documentation
 ================================
 
 .. image:: https://github.com/estructuraPy/sigepy/raw/main/estructurapy.png
-   :alt: SigePy Logo
+   :alt: estructuraPy logo
    :align: center
    :width: 300px
 

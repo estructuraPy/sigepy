@@ -1,3 +1,22 @@
+"""
+Module for Continuous Wavelet Transform (CWT) analysis of acceleration data.
+
+This module provides functions and utilities for performing wavelet analysis on acceleration data, including:
+- Computing CWT and generating wavelet spectrums
+- Interactive visualization of wavelet spectrums
+- Multiple view representations of wavelet analysis results
+- Time-frequency domain analysis
+- Saving results as static images and interactive HTML plots
+
+Key Functions:
+    calculate_cwt: Performs CWT analysis on acceleration data
+    plot_spectrum_gif: Creates animated GIF of rotating 3D wavelet spectrum
+    plot_interactive_wavelet_spectrum: Interactive 3D visualization of spectrum
+    plot_spectrum_views: Multiple view plots of wavelet spectrum
+    spectrum: Main function for applying CWT and visualizing results
+    plotly_spectrum_views: Interactive multi-view plots using Plotly
+"""
+
 import warnings
 import pandas as pd
 import pywt

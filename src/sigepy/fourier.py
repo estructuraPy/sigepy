@@ -1,3 +1,24 @@
+"""
+Module for Fast Fourier Transform (FFT) analysis of acceleration data.
+
+This module provides functions for performing FFT analysis on acceleration data, including:
+- Computing FFT and generating magnitude spectrums
+- Filtering signals using FFT
+- Plotting FFT results in both frequency and period domains
+- Finding and plotting peaks in FFT spectrums
+
+Functions:
+    calculate_fft: Calculates FFT for multiple acceleration data columns
+    filter_with_fft: Filters signal by zeroing frequencies below threshold
+    plot_normalized_fft_results: Plots normalized FFT magnitude spectrum
+    plot_fft_results: Plots FFT magnitude spectrum
+    plot_fft_results_period_domain: Plots FFT spectrum in period domain
+    plot_peaks: Plots peaks in FFT magnitude spectrum
+    plotly_normalized_fft_results: Interactive plot of normalized FFT spectrum
+    plotly_fft_results: Interactive plot of FFT spectrum
+    plotly_fft_results_period_domain: Interactive plot of FFT in period domain
+    plotly_peaks: Interactive plot of peaks in FFT spectrum
+"""
 
 import numpy as np
 import pandas as pd

@@ -1,3 +1,24 @@
+"""
+Module implementing Stochastic Subspace Identification with Covariance (SSI-COV) method.
+
+This module provides functionality for modal parameter identification using the SSI-COV method, including:
+- Construction and SVD of block Toeplitz matrices
+- Stability analysis of identified modal parameters
+- Mode shape extraction and MAC calculations
+- Visualization of stability diagrams
+- Cross Power Spectral Density (CPSD) calculations
+
+Key Classes:
+    SSICov: Main class implementing the SSI-COV method
+
+The module enables the identification of:
+- Natural frequencies
+- Damping ratios
+- Mode shapes
+from measured acceleration data, with tools for assessing the stability and reliability
+of the identified modal parameters.
+"""
+
 import numpy as np
 import pandas as pd
 from scipy import signal
