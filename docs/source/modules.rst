@@ -8,7 +8,8 @@ SigePy is a Python library for structural vibration analysis, providing tools fo
 * Wavelet-based time-frequency analysis
 * Signal processing and utilities
 
-This documentation contains detailed API references for all modules.
+Module Contents
+--------------
 
 .. toctree::
    :maxdepth: 2
@@ -19,25 +20,14 @@ This documentation contains detailed API references for all modules.
    modules/wavelet
    modules/utils
 
-Modules
-=======
+API Reference
+------------
 
-Fourier analysis and frequency domain processing
------------
-.. automodule:: sigepy.fourier
-    :members:
+.. autosummary::
+   :toctree: _autosummary
+   :recursive:
 
-Installation
------------
-.. automodule:: sigepy.ssi_cov
-    :members:
-
-Installation
------------
-.. automodule:: sigepy.wavelet
-    :members:
-
-Installation
------------
-.. automodule:: sigepy.utils
-    :members:
+   sigepy.fourier
+   sigepy.ssi_cov
+   sigepy.wavelet
+   sigepy.utils
