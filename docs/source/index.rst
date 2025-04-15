@@ -1,18 +1,20 @@
 .. SigePy documentation master file.
 
-SigePy is an advanced Python library designed for structural vibration analysis and system identification. 
-Developed under estructuraPy, a trademark of ANM Ingeniería, it provides robust capabilities for processing
-experimental and operational modal data. It's particularly useful for civil and mechanical engineers,
-researchers, and professionals working with structural health monitoring, modal analysis, and vibration-based
-damage detection.  
-It integrates both existing libraries and custom-built algorithms to enhance the implementation of advanced modal
-analysis and signal processing methods.
+SigePy is an advanced Python library developed under estructuraPy, a trademark of ANM Ingeniería, for structural vibration analysis and system identification. It integrates both existing libraries and custom-built algorithms to enhance the implementation of advanced modal analysis and signal processing methods.
+Core Features:
 
+- System Identification & Modal Analysis: Covariance-driven and data-driven stochastic subspace identification.
+- Time & Frequency Domain Analysis: Peak detection, spectral analysis, and Fourier transforms.
+- Signal Processing: Digital filtering, adaptive filtering, and signal enhancement.
+- Integration of Existing Libraries: Utilizes NumPy, SciPy, Matplotlib, and other powerful Python libraries for efficient computation.
+- Custom-Built Code: Implements proprietary algorithms to optimize and extend standard methodologies.
+- Visualization Tools: Stabilization diagrams, time-frequency spectra, and modal shape representations.
+- Artificial Signal Generation for Testing: While some algorithms for signal generation are included, SigePy is not primarily designed to generate signals. The provided methods may not conform to all criteria required for signal synthesis, but they are useful for creating artificial signals to test the library and validate signal decomposition techniques.
 
 SigePy it's a Python development of estructuraPy a trademark of ANM Ingenieria https://www.anmingenieria.com/.
 
 .. image:: https://github.com/estructuraPy/sigepy/raw/main/estructurapy.png
-   :alt: SigePy Logo
+   :alt: estructuraPy Logo
    :align: center
    :width: 300px
 

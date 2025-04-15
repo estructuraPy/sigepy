@@ -4,10 +4,7 @@ import os
 import sys
 import warnings
 
-# Asegurar que Sphinx pueda encontrar los módulos - ajustar la ruta según sea necesario
-sys.path.insert(0, os.path.abspath('..'))
-sys.path.insert(0, os.path.abspath('../..'))
-sys.path.insert(0, os.path.abspath('../../src'))
+sys.path.insert(0, os.path.abspath('../../../src/sigepy'))
 
 # Mock imports para evitar errores con dependencias externas
 autodoc_mock_imports = ['numpy', 'pandas', 'scipy', 'matplotlib', 'plotly', 
