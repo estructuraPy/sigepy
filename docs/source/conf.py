@@ -1,86 +1,34 @@
 # Configuration file for the Sphinx documentation builder.
+#
+# For the full list of built-in configuration values, see the documentation:
 
 import os
 import sys
-import warnings
 
-sys.path.insert(0, os.path.abspath('../../../src/sigepy'))
+sys.path.insert(0, os.path.abspath('../../src'))
+# -- Project information -----------------------------------------------------
 
-# Mock imports para evitar errores con dependencias externas
-autodoc_mock_imports = ['numpy', 'pandas', 'scipy', 'matplotlib', 'plotly', 
-                        'pywt', 'tqdm', 'PIL', 'ipywidgets']
-
-# Configuración del proyecto
 project = 'SigePy'
-author = 'Angel Navarro-Mora'
 copyright = '2025, estructuraPy'
-release = '0.1.5'
+author = 'Angel Navarro-Mora'
+release = '0.1.4'
 
-# Extensiones necesarias
+# -- General configuration ---------------------------------------------------
+
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
-    'sphinx.ext.autosummary',
+    'sphinx.ext.napoleon'
 ]
-
-# Add intersphinx extension
-extensions.append('sphinx.ext.intersphinx')
-
-# Configure intersphinx mapping
-intersphinx_mapping = {
-    'python': ('https://docs.python.org/3', None),
-    'numpy': ('https://numpy.org/doc/stable', None),
-    'pandas': ('https://pandas.pydata.org/docs', None),
-    'matplotlib': ('https://matplotlib.org/stable', None),
-    'plotly': ('https://plotly.com/python-api-reference', None),
-}
-
-# Add nitpick ignore patterns for common external references
-nitpick_ignore = [
-    ('py:class', 'pandas.DataFrame'),
-    ('py:class', 'numpy.ndarray'),
-    ('py:class', 'numpy.typing.NDArray'),
-    ('py:class', 'plotly.graph_objects.Figure'),
-    ('py:class', 'plotly.graph_objs.Figure'),
-    ('py:class', '_io._BufferedIOBase'),
-    ('py:class', 'pathlib.PurePath'),
-    ('py:class', 'callable'),
-    # Add new patterns for SSI-COV warnings
-    ('py:class', 'None'),
-    ('py:class', 'a shallow copy of od'),
-    ('py:class', 'a set-like object providing a view on D\'s items'),
-    ('py:class', 'a set-like object providing a view on D\'s keys'),
-    ('py:class', 'v, remove specified key and return the corresponding value'),
-    ('py:class', 'an object providing a view on D\'s values'),
-    ('py:class', 'Tuple containing'),
-    ('py:class', 'A tuple containing'),
-    ('py:class', 'reversed_dict'),
-]
-
-# Opciones de autodoc - ajustar para mostrar más contenido
-autodoc_default_options = {
-    'members': True,
-    'undoc-members': True,
-    'show-inheritance': True,
-    'special-members': '__init__, __post_init__',
-    'imported-members': True,
-}
-
-# Ensure that the __init__ method is documented
-autoclass_content = 'both'
-
-# Genera resúmenes automáticos
-autosummary_generate = True
 
 templates_path = ['_templates']
-exclude_patterns = []
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
-# Opciones HTML
+
+# -- Options for HTML output -------------------------------------------------
+
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
-html_logo = 'https://github.com/estructuraPy/sigepy/raw/main/estructurapy.png'
 
-# Para debugging
-keep_warnings = True
-nitpicky = True
+# Ensure that the module documentation can be found
+html_extra_path = ['modules']

@@ -1,19 +1,18 @@
 Stochastic Subspace Identification (SSI-COV)
-============================================
-
-.. module:: sigepy.ssi_cov
-
-This module implements Covariance-driven Stochastic Subspace Identification for modal analysis of structural vibration data.
-
-.. currentmodule:: sigepy.ssi_cov
-
-.. autosummary::
-   :toctree: _autosummary
+===========================================
 
 .. automodule:: sigepy.ssi_cov
    :members:
    :undoc-members:
    :show-inheritance:
-   :special-members: __post_init__
-   :exclude-members: OrderedDict
+
+Overview
+--------
+
+The ``ssi_cov`` module implements Covariance-driven Stochastic Subspace Identification for modal analysis:
+
+* Extraction of modal parameters (natural frequencies, damping ratios, mode shapes)
+* Creation of stabilization diagrams
+* Automated model order selection
+* Robust handling of noisy data
 

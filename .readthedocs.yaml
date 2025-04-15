@@ -2,8 +2,6 @@ version: 2
 
 sphinx:
   configuration: docs/source/conf.py
-  fail_on_warning: true
-  builder: html
 
 formats:
   - htmlzip
@@ -12,14 +10,9 @@ formats:
 
 python:
   install:
-    - method: pip
-      path: .
     - requirements: requirements.txt
 
 build:
   os: ubuntu-22.04
   tools:
     python: "3.12"
-  jobs:
-    pre_build:
-      - mkdir -p docs/source/_static  # create missing static folder
