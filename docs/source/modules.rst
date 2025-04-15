@@ -22,14 +22,22 @@ This documentation contains detailed API references for all modules.
 Modules
 =======
 
+Fourier analysis and frequency domain processing
+-----------
 .. automodule:: sigepy.fourier
     :members:
 
+Installation
+-----------
 .. automodule:: sigepy.ssi_cov
     :members:
 
+Installation
+-----------
 .. automodule:: sigepy.wavelet
     :members:
 
+Installation
+-----------
 .. automodule:: sigepy.utils
     :members:
