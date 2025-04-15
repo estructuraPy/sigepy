@@ -1,11 +1,9 @@
 .. SigePy documentation master file.
 
-
 .. image:: https://github.com/estructuraPy/sigepy/raw/main/estructurapy.png
    :alt: SigePy Logo
    :align: center
    :width: 300px
-
 
 Welcome to SigePy's Documentation
 ==================================
