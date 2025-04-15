@@ -1,7 +1,7 @@
-.. SigePy documentation master file, created by
-   sphinx-quickstart on Sun Apr 13 00:12:43 2025.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+# SigePy is an advanced Python library developed under estructuraPy, a trademark of ANM Ingeniería,
+for structural vibration analysis and system identification. It integrates both existing libraries
+and custom-built algorithms to enhance the implementation of advanced modal analysis and signal processing methods.
+
 
 SigePy documentation
 ====================
