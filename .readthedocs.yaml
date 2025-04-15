@@ -22,5 +22,4 @@ build:
     python: "3.12"
   jobs:
     pre_build:
-      - cd docs
-      - ls -la
+      - mkdir -p docs/source/_static  # create missing static folder
