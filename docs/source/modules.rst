@@ -1,15 +1,26 @@
 .. SigePy documentation master file.
 
-SigePy is an advanced Python library developed under estructuraPy, a trademark of ANM Ingeniería, for structural vibration analysis and system identification. It integrates both existing libraries and custom-built algorithms to enhance the implementation of advanced modal analysis and signal processing methods.
+Welcome to SigePy's Documentation
+=================================
+SigePy is an advanced Python library developed under estructuraPy, a trademark of ANM Ingeniería, for structural vibration analysis and system identification. 
+It integrates both existing libraries and custom-built algorithms to enhance the implementation of advanced modal analysis and signal processing methods.
 Core Features:
 
-- System Identification & Modal Analysis: Covariance-driven and data-driven stochastic subspace identification.
-- Time & Frequency Domain Analysis: Peak detection, spectral analysis, and Fourier transforms.
-- Signal Processing: Digital filtering, adaptive filtering, and signal enhancement.
-- Integration of Existing Libraries: Utilizes NumPy, SciPy, Matplotlib, and other powerful Python libraries for efficient computation.
-- Custom-Built Code: Implements proprietary algorithms to optimize and extend standard methodologies.
-- Visualization Tools: Stabilization diagrams, time-frequency spectra, and modal shape representations.
-- Artificial Signal Generation for Testing: While some algorithms for signal generation are included, SigePy is not primarily designed to generate signals. The provided methods may not conform to all criteria required for signal synthesis, but they are useful for creating artificial signals to test the library and validate signal decomposition techniques.
+- **System Identification & Modal Analysis**: Covariance-driven and data-driven stochastic subspace identification.
+- **Time & Frequency Domain Analysis**: Peak detection, spectral analysis, and Fourier transforms.
+- **Signal Processing**: Digital filtering, adaptive filtering, and signal enhancement.
+- **Integration of Existing Libraries**: Utilizes NumPy, SciPy, Matplotlib, and other powerful Python libraries for efficient computation.
+- **Custom-Built Code**: Implements proprietary algorithms to optimize and extend standard methodologies.
+- **Visualization Tools**: Stabilization diagrams, time-frequency spectra, and modal shape representations.
+- **Artificial Signal Generation for Testing**: While some algorithms for signal generation are included, SigePy is not primarily designed to generate signals. The provided methods may not conform to all criteria required for signal synthesis, but they are useful for creating artificial signals to test the library and validate signal decomposition techniques.
+
+Key Features
+------------
+
+* **Fourier Analysis**: Enhanced FFT for structural dynamics, peak detection, and spectral analysis
+* **Stochastic Subspace Identification**: Covariance-driven SSI for modal identification
+* **Wavelet Analysis**: Time-frequency analysis for non-stationary signals
+* **Signal Processing**: Time-domain analysis, filtering, and preprocessing
 
 SigePy it's a Python development of estructuraPy a trademark of ANM Ingenieria https://www.anmingenieria.com/.
 
@@ -18,26 +29,11 @@ SigePy it's a Python development of estructuraPy a trademark of ANM Ingenieria h
    :align: center
    :width: 300px
 
-Welcome to SigePy's Documentation
-==================================
-
-**SigePy** is an advanced Python library specialized in structural vibration analysis 
-and system identification, with robust capabilities for processing experimental and 
-operational modal data.
-
 :Author: Angel Navarro-Mora
 :Contact: ahnavarro@anmingenieria.com
 :Copyright: 2025, estructuraPy
 :Version: 0.1.5
 :License: MIT
-
-Key Features
------------
-
-* **Fourier Analysis**: Enhanced FFT for structural dynamics, peak detection, and spectral analysis
-* **Stochastic Subspace Identification**: Covariance-driven SSI for modal identification
-* **Wavelet Analysis**: Time-frequency analysis for non-stationary signals
-* **Signal Processing**: Time-domain analysis, filtering, and preprocessing
 
 .. toctree::
    :maxdepth: 2
