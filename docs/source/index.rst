@@ -12,10 +12,6 @@ Welcome to SigePy's Documentation
 for structural vibration analysis and system identification. It integrates both existing libraries
 and custom-built algorithms to enhance the implementation of advanced modal analysis and signal processing methods.
 
-**SigePy** is an advanced Python library specialized in structural vibration analysis 
-and system identification, with robust capabilities for processing experimental and 
-operational modal data.
-
 :Author: Angel Navarro-Mora
 :Contact: ahnavarro@anmingenieria.com
 :Copyright: 2025, estructuraPy
