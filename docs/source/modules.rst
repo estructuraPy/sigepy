@@ -18,18 +18,3 @@ This documentation contains detailed API references for all modules.
    modules/ssi_cov
    modules/wavelet
    modules/utils
-
-Modules
-=======
-
-.. automodule:: sigepy.fourier
-    :members:
-
-.. automodule:: sigepy.ssi_cov
-    :members:
-
-.. automodule:: sigepy.wavelet
-    :members:
-
-.. automodule:: sigepy.utils
-    :members:
