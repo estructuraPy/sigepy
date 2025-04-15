@@ -40,7 +40,6 @@ Install SigePy using pip:
    :caption: Contents:
 
    modules
-   examples
 
 Indices and tables
 ==================
