@@ -24,6 +24,30 @@ extensions = [
     'sphinx.ext.autosummary',
 ]
 
+# Add intersphinx extension
+extensions.append('sphinx.ext.intersphinx')
+
+# Configure intersphinx mapping
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'numpy': ('https://numpy.org/doc/stable', None),
+    'pandas': ('https://pandas.pydata.org/docs', None),
+    'matplotlib': ('https://matplotlib.org/stable', None),
+    'plotly': ('https://plotly.com/python-api-reference', None),
+}
+
+# Add nitpick ignore patterns for common external references
+nitpick_ignore = [
+    ('py:class', 'pandas.DataFrame'),
+    ('py:class', 'numpy.ndarray'),
+    ('py:class', 'numpy.typing.NDArray'),
+    ('py:class', 'plotly.graph_objects.Figure'),
+    ('py:class', 'plotly.graph_objs.Figure'),
+    ('py:class', '_io._BufferedIOBase'),
+    ('py:class', 'pathlib.PurePath'),
+    ('py:class', 'callable'),
+]
+
 # Opciones de autodoc - ajustar para mostrar más contenido
 autodoc_default_options = {
     'members': True,
