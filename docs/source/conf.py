@@ -46,6 +46,16 @@ nitpick_ignore = [
     ('py:class', '_io._BufferedIOBase'),
     ('py:class', 'pathlib.PurePath'),
     ('py:class', 'callable'),
+    # Add new patterns for SSI-COV warnings
+    ('py:class', 'None'),
+    ('py:class', 'a shallow copy of od'),
+    ('py:class', 'a set-like object providing a view on D\'s items'),
+    ('py:class', 'a set-like object providing a view on D\'s keys'),
+    ('py:class', 'v, remove specified key and return the corresponding value'),
+    ('py:class', 'an object providing a view on D\'s values'),
+    ('py:class', 'Tuple containing'),
+    ('py:class', 'A tuple containing'),
+    ('py:class', 'reversed_dict'),
 ]
 
 # Opciones de autodoc - ajustar para mostrar más contenido
