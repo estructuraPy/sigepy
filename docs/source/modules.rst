@@ -31,22 +31,3 @@ API Reference
    sigepy.ssi_cov
    sigepy.fourier
    sigepy.signal
-
-SigePy Modules
-=============
-
-.. automodule:: sigepy
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Modules
--------
-
-.. toctree::
-   :maxdepth: 4
-
-   sigepy.fourier
-   sigepy.ssi
-   sigepy.wavelet
-   sigepy.signal
