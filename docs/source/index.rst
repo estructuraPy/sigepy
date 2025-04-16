@@ -8,7 +8,7 @@ Welcome to SigePy's Documentation
    :align: center
    :width: 200px
 
-**SigePy** is an advanced Python library developed under **estructuraPy**, an open source trademark of **ANM Ingeniería**,
+``SigePy`` is an advanced Python library developed under ``estructuraPy``, an open source trademark of **ANM Ingeniería**,
 for structural vibration analysis and system identification. It integrates both existing libraries
 and custom-built algorithms to enhance the implementation of advanced modal analysis and signal processing methods.
 
