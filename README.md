@@ -75,7 +75,7 @@ pip install sigepy
 
 ## Documentation
 
-For complete API reference and examples, visit our [documentation](https://sigepy.readthedocs.io/).
+For complete API reference and examples, visit our [documentation](https://sig-epy.readthedocs.io/en/latest/_autosummary/sigepy.wavelet.html).
 
 ## License
 
