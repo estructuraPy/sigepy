@@ -1,6 +1,8 @@
-[EstructuraPy Logo](https://github.com/estructuraPy/sigepy/blob/main/estructurapy.png)
-
 # SigePy
+
+<p align="center">
+  <img src="estructurapy.png" alt="estructuraPy" width="200"/>
+</p>
 
 ## A Python Library for Structural Vibration Analysis
 
