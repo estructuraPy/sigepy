@@ -9,9 +9,9 @@ Modules:
 """
 
 # Import core modules for easier access
-from .fourier import calculate_fft, filter_with_fft, plot_fft_results, plot_peaks
-from .ssi_cov import SSICov
-from .utils import (
+from .fo_urier import calculate_fft, filter_with_fft, plot_fft_results, plot_peaks
+from .ss_i_cov import SSICov
+from .util_s import (
     estimate_power_of_two,
     get_tests_files_location,
     get_results_files_location,
@@ -22,4 +22,4 @@ from .utils import (
     generate_vibration_signal,
     generate_vibration_signals,
 )
-from .wavelet import calculate_cwt, plot_spectrum_views, spectrum
+from .wa_velet import calculate_cwt, plot_spectrum_views, spectrum

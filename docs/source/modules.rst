@@ -12,7 +12,7 @@ Modules
 -------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
    :caption: Package Modules:
 
    modules/fourier
