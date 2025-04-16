@@ -51,4 +51,5 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
 # Ensure that the module documentation can be found
-html_extra_path = ['modules']
+html_extra_path = []  # Remove this line or leave empty
+sys.path.insert(0, os.path.abspath('../..'))  # Ajustar el path para encontrar los módulos

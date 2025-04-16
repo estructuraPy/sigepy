@@ -18,4 +18,4 @@ Module Reference
    modules/fourier
    modules/ssi_cov
    modules/wavelet
-   modules/utils
+   modules/signal
