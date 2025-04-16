@@ -39,10 +39,13 @@ Install SigePy using pip:
    pip install sigepy
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
    :caption: Contents:
 
-   modules
+   modules/wavelet
+   modules/ssi_cov
+   modules/fourier
+   modules/signal
 
 Indices and tables
 ==================

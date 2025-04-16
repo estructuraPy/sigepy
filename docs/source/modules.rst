@@ -15,10 +15,10 @@ Modules
    :maxdepth: 4
    :caption: Package Modules:
 
-   modules/fourier
-   modules/ssi_cov
    modules/wavelet
-   modules/utils
+   modules/ssi_cov
+   modules/fourier
+   modules/signal
 
 API Reference
 ------------
@@ -27,10 +27,10 @@ API Reference
    :toctree: _autosummary
    :recursive:
 
-   sigepy.fourier
-   sigepy.ssi_cov
    sigepy.wavelet
-   sigepy.utils
+   sigepy.ssi_cov
+   sigepy.fourier
+   sigepy.signal
 
 SigePy Modules
 =============
