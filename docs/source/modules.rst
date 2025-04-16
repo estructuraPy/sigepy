@@ -39,14 +39,3 @@ SigePy Modules
    :members:
    :undoc-members:
    :show-inheritance:
-
-Submodules
-----------
-
-.. toctree::
-   :maxdepth: 4
-
-   sigepy.fourier
-   sigepy.ssi
-   sigepy.wavelet
-   sigepy.signal
