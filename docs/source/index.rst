@@ -3,13 +3,10 @@
 Welcome to SigePy's Documentation
 ================================
 
-.. |logo| image:: https://github.com/estructuraPy/sigepy/raw/main/estructurapy.png
+.. image:: https://github.com/estructuraPy/sigepy/raw/main/estructurapy.png
    :alt: estructuraPy logo
    :align: center
    :width: 200px
-   :target: https://github.com/estructuraPy/sigepy
-
-|logo|
 
 **SigePy** is an advanced Python library developed under **estructuraPy**, an open source trademark of **ANM Ingeniería**,
 for structural vibration analysis and system identification. It integrates both existing libraries
